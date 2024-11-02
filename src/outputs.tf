@@ -1,4 +1,4 @@
-output "mock" {
-  description = "Mock output example for the Cloud Posse Terraform component template"
-  value       = local.enabled ? "hello ${basename(abspath(path.module))}" : ""
+output "redis_clusters" {
+  description = "Redis cluster objects"
+  value       = local.enabled ? local.clusters : {}
 }
