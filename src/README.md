@@ -5,7 +5,7 @@ tags:
   - provider/aws
 ---
 
-# Component: `elasticache`
+# Component: `elasticache-redis`
 
 This component is responsible for provisioning [ElastiCache Redis](https://aws.amazon.com/elasticache/redis/) clusters.
 
