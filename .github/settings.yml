@@ -5,5 +5,3 @@ repository:
   description: This component is responsible for provisioning ElastiCache Redis clusters
   homepage: https://cloudposse.com/accelerate
   topics: terraform, terraform-component
-
-
