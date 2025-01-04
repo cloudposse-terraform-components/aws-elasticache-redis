@@ -71,7 +71,7 @@ resource "random_password" "auth_token" {
 
 module "parameter_store_write" {
   source  = "cloudposse/ssm-parameter-store/aws"
-  version = "0.10.0"
+  version = "0.13.0"
 
   enabled = local.auth_token_enabled
 
