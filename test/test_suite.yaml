@@ -1,0 +1,6 @@
+configfilepath: test_suite.yaml
+fixturesdir: fixtures
+randomidentifier: yfoovm
+srcdir: ../src
+statedir: /var/folders/qm/sgmvwnhs2tndtwwx_mpkxm900000gn/T/atmos-test-helper1526114040/state
+tempdir: /var/folders/qm/sgmvwnhs2tndtwwx_mpkxm900000gn/T/atmos-test-helper1526114040
