@@ -42,7 +42,7 @@ func (s *ComponentSuite) TestBasic() {
 		},
 	}
 
-	defer s.DestroyAtmosComponent(s.T(), component, stack, &inputs)
+	defer s.DestroyAtmosComponent(s.T(), component, stack, nil)
 	options, _ := s.DeployAtmosComponent(s.T(), component, stack, &inputs)
 	assert.NotNil(s.T(), options)
 
