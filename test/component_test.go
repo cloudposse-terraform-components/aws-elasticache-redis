@@ -30,7 +30,7 @@ func (s *ComponentSuite) TestBasic() {
 				"replicas_per_shard": 1,
 				"num_replicas":       1,
 				"engine":             engineName,
-				"engine_version":     "8.0",
+				"engine_version":     "6.2",
 				"instance_type":      "cache.t4g.small",
 				"parameters": []map[string]any{
 					{
