@@ -19,13 +19,13 @@ func (s *ComponentSuite) TestBasic() {
 	const stack = "default-test"
 	const awsRegion = "us-east-2"
 
-	engineName := "valkey"
+	engineName := "redis"
 	uniqueSuffix := strings.ToLower(random.UniqueId())
 
 	inputs := map[string]any{
 		"name": fmt.Sprintf("%s-%s", engineName, uniqueSuffix),
 		"redis_clusters": map[string]any{
-			"valkey-test": map[string]any{
+			"redis-test": map[string]any{
 				"num_shards":         0,
 				"replicas_per_shard": 1,
 				"num_replicas":       1,

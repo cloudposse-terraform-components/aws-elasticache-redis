@@ -5,7 +5,7 @@ components:
         component: target
       vars:
         enabled: false
-        family: valkey8
+        family: redis8
         allow_ingress_from_this_vpc: true
         egress_cidr_blocks: ["0.0.0.0/0"]
         port: 6379
