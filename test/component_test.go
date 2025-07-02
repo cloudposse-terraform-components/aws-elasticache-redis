@@ -34,7 +34,7 @@ func (s *ComponentSuite) TestBasic() {
 				"instance_type":      "cache.t4g.small",
 				"parameters": []map[string]any{
 					{
-						"name":  "extended-redis-compatibility",
+						"name":  "cluster-allow-pubsubshard-when-down",
 						"value": "yes",
 					},
 				},
