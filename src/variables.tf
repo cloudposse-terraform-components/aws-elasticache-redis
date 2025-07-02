@@ -28,6 +28,7 @@ variable "port" {
 variable "ingress_cidr_blocks" {
   type        = list(string)
   description = "CIDR blocks for permitted ingress"
+  default     = []
 }
 
 variable "allow_all_egress" {
