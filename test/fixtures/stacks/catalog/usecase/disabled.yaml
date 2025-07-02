@@ -16,4 +16,15 @@ components:
         cloudwatch_metric_alarms_enabled: true
         snapshot_retention_limit: 7
         automatic_failover_enabled: false
+        redis_clusters:
+          redis-test:
+            num_shards: 0
+            replicas_per_shard: 1
+            num_replicas: 1
+            engine: "redis"
+            engine_version: "7.0"
+            instance_type: "cache.t4g.small"
+            parameters:
+              - name: cluster-allow-pubsubshard-when-down
+                value: "yes"
 
