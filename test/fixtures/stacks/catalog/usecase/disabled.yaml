@@ -7,7 +7,7 @@ components:
         enabled: false
         family: redis7
         allow_ingress_from_this_vpc: true
-        egress_cidr_blocks: ["0.0.0.0/0"]
+        allow_all_egress: true
         port: 6379
         at_rest_encryption_enabled: true
         transit_encryption_enabled: true
