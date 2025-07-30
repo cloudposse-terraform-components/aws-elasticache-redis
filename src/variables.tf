@@ -111,3 +111,21 @@ variable "snapshot_retention_limit" {
   description = "The number of days for which ElastiCache will retain automatic cache cluster snapshots before deleting them."
   default     = 0
 }
+
+variable "vpc_component_name" {
+  type        = string
+  description = "The name of a VPC component"
+  default     = "vpc"
+}
+
+variable "vpc_ingress_component_name" {
+  type        = string
+  description = "The name of a Ingress VPC component"
+  default     = "vpc"
+}
+
+variable "dns_delegated_component_name" {
+  type        = string
+  description = "The name of the Delegated DNS component"
+  default     = "dns-delegated"
+}

@@ -21,7 +21,6 @@ description: |-
           enabled: true
           name: "elasticache-redis"
           family: redis6.x
-          ingress_cidr_blocks: []
           egress_cidr_blocks: ["0.0.0.0/0"]
           port: 6379
           at_rest_encryption_enabled: true
