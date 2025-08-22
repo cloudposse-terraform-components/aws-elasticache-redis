@@ -7,8 +7,9 @@ tags:
 
 # Component: `elasticache-redis`
 
-This component is responsible for provisioning [ElastiCache Redis](https://aws.amazon.com/elasticache/redis/) clusters.
-
+This component provisions AWS [ElastiCache Redis](https://aws.amazon.com/elasticache/redis/) clusters.
+The `engine` can either be `redis` or `valkey`. For more information, see
+[why aws supports valkey](https://aws.amazon.com/blogs/opensource/why-aws-supports-valkey/).
 ## Usage
 
 **Stack Level**: Regional
@@ -25,7 +26,6 @@ components:
         enabled: true
         name: "elasticache-redis"
         family: redis6.x
-        ingress_cidr_blocks: []
         egress_cidr_blocks: ["0.0.0.0/0"]
         port: 6379
         at_rest_encryption_enabled: true
@@ -70,11 +70,11 @@ components:
                 value: lK
 ```
 
-The `engine` can either be `redis` or `valkey`. For more information, see
-[why aws supports valkey](https://aws.amazon.com/blogs/opensource/why-aws-supports-valkey/).
-
 <!-- prettier-ignore-start -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- prettier-ignore-end -->
+
+
+<!-- markdownlint-disable -->
 ## Requirements
 
 | Name | Version |
@@ -153,12 +153,17 @@ No resources.
 | Name | Description |
 |------|-------------|
 | <a name="output_redis_clusters"></a> [redis\_clusters](#output\_redis\_clusters) | Redis cluster objects |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-<!-- prettier-ignore-end -->
+<!-- markdownlint-restore -->
+
+
 
 ## References
 
-- [cloudposse/terraform-aws-components](https://github.com/cloudposse/terraform-aws-components/tree/main/modules/elasticache-redis) -
-  Cloud Posse's upstream component
+
+- [cloudposse-terraform-components](https://github.com/orgs/cloudposse-terraform-components/repositories) - Cloud Posse's upstream component
+
+
+
 
 [<img src="https://cloudposse.com/logo-300x69.svg" height="32" align="right"/>](https://cpco.io/homepage?utm_source=github&utm_medium=readme&utm_campaign=cloudposse-terraform-components/aws-elasticache-redis&utm_content=)
+
