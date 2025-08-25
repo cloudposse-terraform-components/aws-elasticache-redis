@@ -1,0 +1,18 @@
+components:
+  terraform:
+    elasticache-redis/basic:
+      metadata:
+        component: target
+      vars:
+        enabled: true
+        family: redis7
+        allow_ingress_from_this_vpc: true
+        allow_all_egress: true
+        port: 6379
+        at_rest_encryption_enabled: true
+        transit_encryption_enabled: true
+        apply_immediately: true
+        auto_minor_version_upgrade: true
+        cloudwatch_metric_alarms_enabled: true
+        snapshot_retention_limit: 7
+        automatic_failover_enabled: false
