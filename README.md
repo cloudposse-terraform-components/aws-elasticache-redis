@@ -205,6 +205,7 @@ No resources.
 | Name | Description |
 |------|-------------|
 | <a name="output_redis_clusters"></a> [redis\_clusters](#output\_redis\_clusters) | Redis cluster objects |
+| <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The security group ID of the ElastiCache Redis cluster |
 <!-- markdownlint-restore -->
 
 
