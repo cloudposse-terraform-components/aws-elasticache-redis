@@ -88,6 +88,7 @@ variable "parameter_group_name" {
 }
 
 variable "kms_alias_name_ssm" {
+  type        = string
   default     = "alias/aws/ssm"
   description = "KMS alias name for SSM"
 }

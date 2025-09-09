@@ -5,7 +5,7 @@ locals {
 
   ssm_path_auth_token = local.auth_token_enabled ? format("/%s/%s/%s", "elasticache-redis", var.cluster_name, "auth_token") : null
 
-  auth_token = local.auth_token_enabled ? join("", random_password.auth_token.*.result) : null
+  auth_token = local.auth_token_enabled ? random_password.auth_token[0].result : null
 }
 
 module "redis" {
