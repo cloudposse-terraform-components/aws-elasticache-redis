@@ -64,6 +64,7 @@ variable "cluster_attributes" {
     multi_az_enabled                = bool
     at_rest_encryption_enabled      = bool
     transit_encryption_enabled      = bool
+    transit_encryption_mode         = string
     apply_immediately               = bool
     automatic_failover_enabled      = bool
     auto_minor_version_upgrade      = bool
