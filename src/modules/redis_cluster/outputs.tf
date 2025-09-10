@@ -29,6 +29,6 @@ output "cluster_ssm_path_auth_token" {
 }
 
 output "transit_encryption_mode" {
-  value       = local.enabled ? module.redis.transit_encryption_mode : null
+  value       = module.redis.transit_encryption_mode
   description = "TLS in-transit encryption mode for Redis cluster"
 }
