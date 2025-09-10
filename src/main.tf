@@ -47,6 +47,7 @@ locals {
     port                             = var.port
     at_rest_encryption_enabled       = var.at_rest_encryption_enabled
     transit_encryption_enabled       = var.transit_encryption_enabled
+    transit_encryption_mode          = var.transit_encryption_mode
     apply_immediately                = var.apply_immediately
     automatic_failover_enabled       = var.automatic_failover_enabled
     auto_minor_version_upgrade       = var.auto_minor_version_upgrade

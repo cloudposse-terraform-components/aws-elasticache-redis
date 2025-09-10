@@ -5,12 +5,12 @@ locals {
 
   ssm_path_auth_token = local.auth_token_enabled ? format("/%s/%s/%s", "elasticache-redis", var.cluster_name, "auth_token") : null
 
-  auth_token = local.auth_token_enabled ? join("", random_password.auth_token.*.result) : null
+  auth_token = local.auth_token_enabled ? one(random_password.auth_token[*].result) : null
 }
 
 module "redis" {
   source  = "cloudposse/elasticache-redis/aws"
-  version = "1.9.2"
+  version = "1.10.0"
 
   name = var.cluster_name
 
@@ -39,6 +39,7 @@ module "redis" {
   port                                 = var.cluster_attributes.port
   subnets                              = var.cluster_attributes.subnets
   transit_encryption_enabled           = var.cluster_attributes.transit_encryption_enabled
+  transit_encryption_mode              = var.cluster_attributes.transit_encryption_mode
   snapshot_retention_limit             = var.cluster_attributes.snapshot_retention_limit
   vpc_id                               = var.cluster_attributes.vpc_id
   zone_id                              = var.cluster_attributes.zone_id

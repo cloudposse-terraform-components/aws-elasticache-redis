@@ -27,3 +27,8 @@ output "cluster_ssm_path_auth_token" {
   value       = local.ssm_path_auth_token
   description = "SSM path of Redis auth_token"
 }
+
+output "transit_encryption_mode" {
+  value       = module.redis.transit_encryption_mode
+  description = "TLS in-transit encryption mode for Redis cluster"
+}

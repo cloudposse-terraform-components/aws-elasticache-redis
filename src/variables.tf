@@ -50,6 +50,12 @@ variable "transit_encryption_enabled" {
   description = "Enable TLS"
 }
 
+variable "transit_encryption_mode" {
+  type        = string
+  default     = null
+  description = "Transit encryption mode. Valid values are 'preferred' and 'required'"
+}
+
 variable "auth_token_enabled" {
   type        = bool
   description = "Enable auth token"
