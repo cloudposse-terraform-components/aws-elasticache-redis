@@ -197,6 +197,7 @@ No resources.
 | <a name="input_tags"></a> [tags](#input\_tags) | Additional tags (e.g. `{'BusinessUnit': 'XYZ'}`).<br/>Neither the tag keys nor the tag values will be modified by this module. | `map(string)` | `{}` | no |
 | <a name="input_tenant"></a> [tenant](#input\_tenant) | ID element \_(Rarely used, not included by default)\_. A customer identifier, indicating who this instance of a resource is for | `string` | `null` | no |
 | <a name="input_transit_encryption_enabled"></a> [transit\_encryption\_enabled](#input\_transit\_encryption\_enabled) | Enable TLS | `bool` | n/a | yes |
+| <a name="input_transit_encryption_mode"></a> [transit\_encryption\_mode](#input\_transit\_encryption\_mode) | Transit encryption mode. Valid values are 'preferred' and 'required' | `string` | `null` | no |
 | <a name="input_vpc_component_name"></a> [vpc\_component\_name](#input\_vpc\_component\_name) | The name of a VPC component | `string` | `"vpc"` | no |
 | <a name="input_vpc_ingress_component_name"></a> [vpc\_ingress\_component\_name](#input\_vpc\_ingress\_component\_name) | The name of a Ingress VPC component | `string` | `"vpc"` | no |
 
@@ -206,6 +207,7 @@ No resources.
 |------|-------------|
 | <a name="output_redis_clusters"></a> [redis\_clusters](#output\_redis\_clusters) | Redis cluster objects |
 | <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The security group ID of the ElastiCache Redis cluster |
+| <a name="output_transit_encryption_mode"></a> [transit\_encryption\_mode](#output\_transit\_encryption\_mode) | TLS in-transit encryption mode for Redis cluster |
 <!-- markdownlint-restore -->
 
 
