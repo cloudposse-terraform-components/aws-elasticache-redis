@@ -80,6 +80,7 @@ variable "parameters" {
     value = string
   }))
   description = "Parameters to configure cluster parameter group"
+  default     = []
 }
 
 variable "parameter_group_name" {
