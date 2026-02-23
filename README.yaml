@@ -32,6 +32,8 @@ usage: |-
           slow_logs_enabled: true     # opt-in example; module default is false
           engine_logs_enabled: true   # opt-in example; module default is false
           log_retention_days: 7
+          snapshot_window: "06:00-07:00"
+          maintenance_window: "tue:08:00-tue:09:00"
           redis_clusters:
             redis-main:
               num_replicas: 1
