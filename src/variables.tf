@@ -19,12 +19,22 @@ variable "num_shards" {
   type        = number
   default     = 0
   description = "Default number of shards (node groups) for Redis clusters. Value > 0 enables cluster mode. Can be overridden per cluster in redis_clusters."
+
+  validation {
+    condition     = var.num_shards >= 0 && var.num_shards <= 500
+    error_message = "num_shards must be between 0 and 500; use 0 to disable cluster mode."
+  }
 }
 
 variable "replicas_per_shard" {
   type        = number
   default     = 0
   description = "Default number of replica nodes per shard. Valid values are 0 to 5. Can be overridden per cluster in redis_clusters."
+
+  validation {
+    condition     = var.replicas_per_shard >= 0 && var.replicas_per_shard <= 5
+    error_message = "replicas_per_shard must be between 0 and 5."
+  }
 }
 
 variable "family" {
