@@ -80,8 +80,11 @@ resource "aws_cloudwatch_log_group" "engine_log" {
 
   lifecycle {
     precondition {
-      condition     = !var.engine_logs_enabled || can(regex("^7\\.", var.engine_version))
-      error_message = "engine_logs_enabled requires Redis engine version 7.x or later. Got engine_version = \"${var.engine_version}\". Set engine_logs_enabled = false or upgrade engine_version to 7.x."
+      condition = !var.engine_logs_enabled || (
+        tonumber(split(".", var.engine_version)[0]) > 6 ||
+        (tonumber(split(".", var.engine_version)[0]) == 6 && tonumber(split(".", var.engine_version)[1]) >= 2)
+      )
+      error_message = "engine_logs_enabled requires Redis engine version >= 6.2. Got engine_version = \"${var.engine_version}\". Set engine_logs_enabled = false or upgrade engine_version to >= 6.2."
     }
   }
 }
