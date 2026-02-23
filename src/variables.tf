@@ -120,14 +120,24 @@ variable "snapshot_retention_limit" {
 
 variable "snapshot_window" {
   type        = string
-  description = "The daily time range (in UTC) during which ElastiCache begins taking a daily snapshot. Format: hh:mm-hh:mm. Defaults to null (AWS chooses the window)."
+  description = "The daily time range (in UTC) during which ElastiCache begins taking a daily snapshot. Format: hh:mm-hh:mm. Defaults to null (AWS chooses the window). Has no effect when snapshot_retention_limit is 0."
   default     = null
+
+  validation {
+    condition     = var.snapshot_window == null || can(regex("^([01][0-9]|2[0-3]):[0-5][0-9]-([01][0-9]|2[0-3]):[0-5][0-9]$", var.snapshot_window))
+    error_message = "snapshot_window must be in hh:mm-hh:mm format (UTC), e.g. \"05:00-06:00\"."
+  }
 }
 
 variable "maintenance_window" {
   type        = string
   description = "Maintenance window. Format: ddd:hh:mm-ddd:hh:mm (UTC). Defaults to null (AWS chooses the window)."
   default     = null
+
+  validation {
+    condition     = var.maintenance_window == null || can(regex("^(sun|mon|tue|wed|thu|fri|sat):([01][0-9]|2[0-3]):[0-5][0-9]-(sun|mon|tue|wed|thu|fri|sat):([01][0-9]|2[0-3]):[0-5][0-9]$", var.maintenance_window))
+    error_message = "maintenance_window must be in ddd:hh:mm-ddd:hh:mm format (UTC), e.g. \"tue:05:00-tue:06:00\"."
+  }
 }
 
 variable "vpc_component_name" {
