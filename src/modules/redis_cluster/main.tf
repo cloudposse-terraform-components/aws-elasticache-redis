@@ -41,6 +41,8 @@ module "redis" {
   transit_encryption_enabled           = var.cluster_attributes.transit_encryption_enabled
   transit_encryption_mode              = var.cluster_attributes.transit_encryption_mode
   snapshot_retention_limit             = var.cluster_attributes.snapshot_retention_limit
+  snapshot_window                      = var.cluster_attributes.snapshot_window
+  maintenance_window                   = var.cluster_attributes.maintenance_window
   vpc_id                               = var.cluster_attributes.vpc_id
   zone_id                              = var.cluster_attributes.zone_id
 
