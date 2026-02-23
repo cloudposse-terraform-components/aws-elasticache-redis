@@ -77,6 +77,13 @@ resource "aws_cloudwatch_log_group" "engine_log" {
   name              = "/aws/elasticache/${var.cluster_name}/engine-log"
   retention_in_days = var.log_retention_days
   tags              = module.this.tags
+
+  lifecycle {
+    precondition {
+      condition     = !var.engine_logs_enabled || can(regex("^7\\.", var.engine_version))
+      error_message = "engine_logs_enabled requires Redis engine version 7.x or later. Got engine_version = \"${var.engine_version}\". Set engine_logs_enabled = false or upgrade engine_version to 7.x."
+    }
+  }
 }
 
 # https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/auth.html
