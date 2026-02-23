@@ -31,6 +31,8 @@ usage: |-
           snapshot_retention_limit: 1
           num_shards: 0
           replicas_per_shard: 0
+          snapshot_window: "06:00-07:00"
+          maintenance_window: "tue:08:00-tue:09:00"
           redis_clusters:
             redis-main:
               num_replicas: 1

@@ -54,6 +54,8 @@ locals {
     cloudwatch_metric_alarms_enabled = var.cloudwatch_metric_alarms_enabled
     auth_token_enabled               = var.auth_token_enabled
     snapshot_retention_limit         = var.snapshot_retention_limit
+    snapshot_window                  = var.snapshot_window
+    maintenance_window               = var.maintenance_window
   }
 
   clusters = module.redis_clusters
