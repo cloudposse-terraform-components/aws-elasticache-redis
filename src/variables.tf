@@ -18,7 +18,7 @@ variable "multi_az_enabled" {
 variable "num_shards" {
   type        = number
   default     = 0
-  description = "Default number of shards (node groups) for Redis clusters. Value > 0 enables cluster mode. Can be overridden per cluster in redis_clusters."
+  description = "Default number of shards (node groups) for Redis clusters. Value > 0 enables cluster mode. It can be overridden per cluster in redis_clusters."
 
   validation {
     condition     = var.num_shards >= 0 && var.num_shards <= 500
@@ -29,7 +29,7 @@ variable "num_shards" {
 variable "replicas_per_shard" {
   type        = number
   default     = 0
-  description = "Default number of replica nodes per shard. Valid values are 0 to 5. Can be overridden per cluster in redis_clusters."
+  description = "Default number of replica nodes per shard. Valid values are 0 to 5. It can be overridden per cluster in redis_clusters."
 
   validation {
     condition     = var.replicas_per_shard >= 0 && var.replicas_per_shard <= 5
