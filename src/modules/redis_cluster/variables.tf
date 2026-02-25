@@ -72,6 +72,21 @@ variable "cluster_attributes" {
     snapshot_retention_limit        = number
     snapshot_window                 = optional(string, null)
     maintenance_window              = optional(string, null)
+
+    elasticache_subnet_group_name = optional(string, "")
+    network_type                  = optional(string, "ipv4")
+    notification_topic_arn        = optional(string, "")
+    alarm_cpu_threshold_percent   = optional(number, 75)
+    alarm_memory_threshold_bytes  = optional(number, 10000000)
+    alarm_actions                 = optional(list(string), [])
+    ok_actions                    = optional(list(string), [])
+    data_tiering_enabled          = optional(bool, false)
+    auth_token_update_strategy    = optional(string, "ROTATE")
+    kms_key_id                    = optional(string, null)
+    parameter_group_description   = optional(string, null)
+    log_delivery_configuration    = optional(list(map(any)), [])
+    user_group_ids                = optional(list(string), null)
+    global_replication_group_id   = optional(string, null)
   })
   description = "Cluster attributes"
 }
@@ -95,4 +110,34 @@ variable "kms_alias_name_ssm" {
   type        = string
   default     = "alias/aws/ssm"
   description = "KMS alias name for SSM"
+}
+
+variable "snapshot_name" {
+  type        = string
+  description = "The name of a snapshot from which to restore data into the new node group. Changing the snapshot_name forces a new resource."
+  default     = null
+}
+
+variable "snapshot_arns" {
+  type        = list(string)
+  description = "A single-element string list containing an Amazon Resource Name (ARN) of a Redis RDB snapshot file stored in Amazon S3. Example: arn:aws:s3:::my_bucket/snapshot1.rdb"
+  default     = []
+}
+
+variable "final_snapshot_identifier" {
+  type        = string
+  description = "The name of your final node group (shard) snapshot. ElastiCache creates the snapshot from the primary node in the cluster. If omitted, no final snapshot will be made."
+  default     = null
+}
+
+variable "replication_group_id" {
+  type        = string
+  description = "Replication group ID with the following constraints: \nA name must contain from 1 to 20 alphanumeric characters or hyphens. \n The first character must be a letter. \n A name cannot end with a hyphen or contain two consecutive hyphens."
+  default     = ""
+}
+
+variable "description" {
+  type        = string
+  description = "Description of elasticache replication group"
+  default     = null
 }

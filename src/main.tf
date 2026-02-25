@@ -56,6 +56,21 @@ locals {
     snapshot_retention_limit         = var.snapshot_retention_limit
     snapshot_window                  = var.snapshot_window
     maintenance_window               = var.maintenance_window
+
+    elasticache_subnet_group_name = var.elasticache_subnet_group_name
+    network_type                  = var.network_type
+    notification_topic_arn        = var.notification_topic_arn
+    alarm_cpu_threshold_percent   = var.alarm_cpu_threshold_percent
+    alarm_memory_threshold_bytes  = var.alarm_memory_threshold_bytes
+    alarm_actions                 = var.alarm_actions
+    ok_actions                    = var.ok_actions
+    data_tiering_enabled          = var.data_tiering_enabled
+    auth_token_update_strategy    = var.auth_token_update_strategy
+    kms_key_id                    = var.kms_key_id
+    parameter_group_description   = var.parameter_group_description
+    log_delivery_configuration    = var.log_delivery_configuration
+    user_group_ids                = var.user_group_ids
+    global_replication_group_id   = var.global_replication_group_id
   }
 
   clusters = module.redis_clusters
@@ -79,6 +94,12 @@ module "redis_clusters" {
   parameters             = lookup(each.value, "parameters", [])
   parameter_group_name   = lookup(each.value, "parameter_group_name", null)
   cluster_attributes     = local.cluster_attributes
+
+  snapshot_name             = lookup(each.value, "snapshot_name", null)
+  snapshot_arns             = lookup(each.value, "snapshot_arns", [])
+  final_snapshot_identifier = lookup(each.value, "final_snapshot_identifier", null)
+  replication_group_id      = lookup(each.value, "replication_group_id", "")
+  description               = lookup(each.value, "description", null)
 
   context = module.this.context
 }

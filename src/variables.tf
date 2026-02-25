@@ -140,6 +140,95 @@ variable "maintenance_window" {
   }
 }
 
+variable "elasticache_subnet_group_name" {
+  type        = string
+  description = "Subnet group name for the ElastiCache instance"
+  default     = ""
+}
+
+variable "network_type" {
+  type        = string
+  default     = "ipv4"
+  description = "The network type of the cluster. Valid values: ipv4, ipv6, dual_stack."
+}
+
+variable "notification_topic_arn" {
+  type        = string
+  default     = ""
+  description = "Notification topic arn"
+}
+
+variable "alarm_cpu_threshold_percent" {
+  type        = number
+  default     = 75
+  description = "CPU threshold alarm level"
+}
+
+variable "alarm_memory_threshold_bytes" {
+  type        = number
+  default     = 10000000
+  description = "Ram threshold alarm level"
+}
+
+variable "alarm_actions" {
+  type        = list(string)
+  description = "Alarm action list"
+  default     = []
+}
+
+variable "ok_actions" {
+  type        = list(string)
+  description = "The list of actions to execute when this alarm transitions into an OK state from any other state. Each action is specified as an Amazon Resource Number (ARN)"
+  default     = []
+}
+
+variable "data_tiering_enabled" {
+  type        = bool
+  default     = false
+  description = "Enables data tiering. Data tiering is only supported for replication groups using the r6gd node type."
+}
+
+variable "auth_token_update_strategy" {
+  type        = string
+  description = "Strategy to use when updating the auth_token. Valid values are `SET`, `ROTATE`, and `DELETE`. Defaults to `ROTATE`."
+  default     = "ROTATE"
+
+  validation {
+    condition     = contains(["set", "rotate", "delete"], lower(var.auth_token_update_strategy))
+    error_message = "Valid values for auth_token_update_strategy are `SET`, `ROTATE`, and `DELETE`."
+  }
+}
+
+variable "kms_key_id" {
+  type        = string
+  description = "The ARN of the key that you wish to use if encrypting at rest. If not supplied, uses service managed encryption. `at_rest_encryption_enabled` must be set to `true`"
+  default     = null
+}
+
+variable "parameter_group_description" {
+  type        = string
+  default     = null
+  description = "Managed by Terraform"
+}
+
+variable "log_delivery_configuration" {
+  type        = list(map(any))
+  default     = []
+  description = "The log_delivery_configuration block allows the streaming of Redis SLOWLOG or Redis Engine Log to CloudWatch Logs or Kinesis Data Firehose. Max of 2 blocks."
+}
+
+variable "user_group_ids" {
+  type        = list(string)
+  default     = null
+  description = "User Group ID to associate with the replication group"
+}
+
+variable "global_replication_group_id" {
+  type        = string
+  default     = null
+  description = "The ID of the global replication group to which this replication group should belong. If this parameter is specified, the replication group is added to the specified global replication group as a secondary replication group; otherwise, the replication group is not part of any global replication group. If global_replication_group_id is set, the num_node_groups parameter cannot be set."
+}
+
 variable "vpc_component_name" {
   type        = string
   description = "The name of a VPC component"
