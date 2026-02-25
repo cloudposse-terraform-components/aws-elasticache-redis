@@ -71,6 +71,13 @@ locals {
     log_delivery_configuration    = var.log_delivery_configuration
     user_group_ids                = var.user_group_ids
     global_replication_group_id   = var.global_replication_group_id
+
+    serverless_enabled                  = var.serverless_enabled
+    serverless_major_engine_version     = var.serverless_major_engine_version
+    serverless_snapshot_time            = var.serverless_snapshot_time
+    serverless_user_group_id            = var.serverless_user_group_id
+    serverless_cache_usage_limits       = var.serverless_cache_usage_limits
+    serverless_snapshot_arns_to_restore = var.serverless_snapshot_arns_to_restore
   }
 
   clusters = module.redis_clusters

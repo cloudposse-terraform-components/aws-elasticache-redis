@@ -229,6 +229,42 @@ variable "global_replication_group_id" {
   description = "The ID of the global replication group to which this replication group should belong. If this parameter is specified, the replication group is added to the specified global replication group as a secondary replication group; otherwise, the replication group is not part of any global replication group. If global_replication_group_id is set, the num_node_groups parameter cannot be set."
 }
 
+variable "serverless_enabled" {
+  type        = bool
+  default     = false
+  description = "Flag to enable/disable creation of a serverless redis cluster"
+}
+
+variable "serverless_major_engine_version" {
+  type        = string
+  default     = "7"
+  description = "The major version of the engine to use for the serverless cluster"
+}
+
+variable "serverless_snapshot_time" {
+  type        = string
+  default     = "06:00"
+  description = "The daily time (in UTC, format HH:MM) that snapshots will be created from the serverless cache."
+}
+
+variable "serverless_user_group_id" {
+  type        = string
+  default     = null
+  description = "User Group ID to associate with the serverless replication group"
+}
+
+variable "serverless_cache_usage_limits" {
+  type        = map(any)
+  default     = {}
+  description = "The usage limits for the serverless cache. Expected keys are `data_storage` (with `maximum`, `minimum`, `unit`) and `ecpu_per_second` (with `maximum`, `minimum`)."
+}
+
+variable "serverless_snapshot_arns_to_restore" {
+  type        = list(string)
+  default     = []
+  description = "The list of ARN(s) of the snapshot that the new serverless cache will be created from. Available for Redis only."
+}
+
 variable "vpc_component_name" {
   type        = string
   description = "The name of a VPC component"
