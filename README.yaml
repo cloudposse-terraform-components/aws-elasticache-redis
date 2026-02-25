@@ -31,12 +31,15 @@ usage: |-
           snapshot_retention_limit: 1
           snapshot_window: "06:00-07:00"
           maintenance_window: "tue:08:00-tue:09:00"
+          # Global defaults for all redis_clusters (can be overridden per cluster)
+          engine: "redis"
+          num_replicas: 1
+          num_shards: 0
+          replicas_per_shard: 0
+          create_parameter_group: true
+          parameters: []
           redis_clusters:
             redis-main:
-              num_replicas: 1
-              num_shards: 0
-              replicas_per_shard: 0
-              engine: "redis"
               engine_version: 6.0.5
               instance_type: cache.t2.small
               parameters:
@@ -57,9 +60,6 @@ usage: |-
           enabled: true
           redis_clusters:
             redis-main:
-              num_replicas: 1
-              num_shards: 0
-              replicas_per_shard: 0
               engine_version: 6.0.5
               instance_type: cache.t2.small
               parameters:
