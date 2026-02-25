@@ -16,6 +16,7 @@ module "redis" {
 
   additional_security_group_rules      = var.cluster_attributes.additional_security_group_rules
   allow_all_egress                     = var.cluster_attributes.allow_all_egress
+  egress_cidr_blocks                   = var.cluster_attributes.egress_cidr_blocks
   allowed_security_group_ids           = var.cluster_attributes.allowed_security_groups
   apply_immediately                    = var.cluster_attributes.apply_immediately
   at_rest_encryption_enabled           = var.cluster_attributes.at_rest_encryption_enabled

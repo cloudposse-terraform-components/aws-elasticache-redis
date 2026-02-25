@@ -57,6 +57,7 @@ variable "cluster_attributes" {
     additional_security_group_rules = list(any)
     allowed_security_groups         = list(string)
     allow_all_egress                = bool
+    egress_cidr_blocks              = optional(list(string), ["0.0.0.0/0"])
     subnets                         = list(string)
     family                          = string
     port                            = number

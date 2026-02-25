@@ -31,6 +31,12 @@ variable "ingress_cidr_blocks" {
   default     = []
 }
 
+variable "egress_cidr_blocks" {
+  type        = list(string)
+  description = "Egress CIDR blocks for the created security group. Only used when `allow_all_egress` is `false`."
+  default     = ["0.0.0.0/0"]
+}
+
 variable "allow_all_egress" {
   type        = bool
   default     = true

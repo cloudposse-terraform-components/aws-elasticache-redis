@@ -41,6 +41,7 @@ locals {
     allowed_security_groups         = local.allowed_security_groups
     additional_security_group_rules = local.additional_security_group_rules
     allow_all_egress                = var.allow_all_egress
+    egress_cidr_blocks              = var.egress_cidr_blocks
 
     zone_id                          = module.dns_delegated.outputs.default_dns_zone_id
     family                           = var.family
