@@ -65,7 +65,7 @@ components:
       vars:
         enabled: true
         name: "elasticache-redis"
-        family: redis6.x
+        family: redis7.x
         egress_cidr_blocks: ["0.0.0.0/0"]
         port: 6379
         at_rest_encryption_enabled: true
@@ -85,14 +85,14 @@ components:
         parameters: []
         redis_clusters:
           redis-main:
-            engine_version: 6.0.5
-            instance_type: cache.t2.small
+            engine_version: "7.0"
+            instance_type: cache.t4g.small
             parameters:
               - name: notify-keyspace-events
                 value: "lK"
 ```
 
-`stacks/org/ou/account/region.yaml` file (imports and overrides the default settings for a specific cluster):
+`stacks/org/ou/account/region.yaml` file (imports defaults and overrides per-cluster settings):
 
 ```yaml
 import:
@@ -105,11 +105,57 @@ components:
         enabled: true
         redis_clusters:
           redis-main:
-            engine_version: 6.0.5
-            instance_type: cache.t2.small
+            engine_version: "7.0"
+            instance_type: cache.t4g.small
+            # Per-cluster overrides of the global defaults
+            num_replicas: 2       # override global default of 1
+            num_shards: 3         # override global default of 0 (enables cluster mode)
+            replicas_per_shard: 1 # override global default of 0
             parameters:
               - name: notify-keyspace-events
                 value: lK
+```
+
+Alternatively, if any per-cluster defaults are not covered by component-level variables,
+use [YAML anchors](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) to define shared
+values once and merge them into each cluster entry:
+
+```yaml
+# stacks/catalog/elasticache/elasticache-redis/defaults.yaml
+anchors:
+  default_redis: &default_redis
+    engine: "redis"
+    engine_version: "7.0"
+    instance_type: cache.t4g.small
+    num_replicas: 1
+    num_shards: 0
+    replicas_per_shard: 0
+
+components:
+  terraform:
+    elasticache-redis:
+      vars:
+        enabled: true
+        name: "elasticache-redis"
+        family: redis7.x
+        port: 6379
+        at_rest_encryption_enabled: true
+        transit_encryption_enabled: false
+        apply_immediately: false
+        automatic_failover_enabled: false
+        cloudwatch_metric_alarms_enabled: false
+        snapshot_retention_limit: 1
+        redis_clusters:
+          redis-main:
+            <<: *default_redis     # merge anchor defaults
+            num_replicas: 2        # override anchor value
+          redis-valkey:
+            <<: *default_redis
+            engine: "valkey"       # override engine to valkey
+            num_shards: 3          # enable cluster mode
+            replicas_per_shard: 1
+          redis-cache:
+            <<: *default_redis     # all anchor defaults apply
 ```
 
 <!-- prettier-ignore-start -->
