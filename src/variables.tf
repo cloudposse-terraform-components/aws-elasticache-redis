@@ -54,6 +54,11 @@ variable "transit_encryption_mode" {
   type        = string
   default     = null
   description = "Transit encryption mode. Valid values are 'preferred' and 'required'"
+
+  validation {
+    condition     = var.transit_encryption_mode == null ? true : contains(["preferred", "required"], var.transit_encryption_mode)
+    error_message = "transit_encryption_mode must be either \"preferred\" or \"required\"."
+  }
 }
 
 variable "auth_token_enabled" {
