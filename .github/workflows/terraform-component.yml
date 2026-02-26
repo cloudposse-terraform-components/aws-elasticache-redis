@@ -1,0 +1,113 @@
+---
+# This is a local override of cloudposse-terraform-components/.github's shared-terraform-component.yml.
+# The only change is that the `terraform` job uses a local ci-terraform.yml instead of the shared one,
+# which sources account-map from cloudposse-terraform-components/aws-account-map (v1.537.2)
+# instead of the monorepo's outdated cloudposse/terraform-aws-components (1.521.0).
+#
+# TODO: Remove this file (and ci-terraform.yml) once cloudposse-terraform-components/.github
+# updates shared-ci-terraform.yml to use a compatible account-map version. Then revert
+# branch.yml to call the shared workflow directly.
+name: "Shared terraform module"
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        description: "Overrides job runs-on setting (json-encoded list)"
+        type: string
+        required: false
+        default: '["ubuntu-latest"]'
+    secrets:
+      REPO_ACCESS_TOKEN:
+        description: "GitHub API token"
+        required: false
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: false
+
+jobs:
+  context:
+    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || github.event.pull_request.state == 'open' }}
+    runs-on: ${{ fromJSON(inputs.runs-on) }}
+    steps:
+      - uses: cloudposse-github-actions/get-pr@v2
+        id: pr
+
+      - name: Get labels
+        if: ${{ steps.pr.outputs.json != '' }}
+        id: labels
+        run: |-
+          echo "${{ fromJSON(steps.pr.outputs.json).labels.*.name }}"
+          echo "${{ contains( fromJSON(steps.pr.outputs.json).labels.*.name, 'no-release') }}"
+          echo "no-release=${{ contains( fromJSON(steps.pr.outputs.json).labels.*.name, 'no-release') }}" >> $GITHUB_OUTPUT
+
+    outputs:
+      no-release: ${{ steps.labels.outputs.no-release }}
+
+  terraform:
+    uses: ./.github/workflows/ci-terraform.yml
+    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || github.event.pull_request.state == 'open' }}
+    needs: [context]
+    with:
+      filter-mode: ${{ github.event_name == 'pull_request' && 'diff_context' || 'nofilter' }}
+      suggestions: "${{ github.event_name == 'pull_request' }}"
+      runs-on: ${{ inputs.runs-on }}
+
+  readme:
+    uses: cloudposse-terraform-components/.github/.github/workflows/shared-readme.yml@main
+    if: ${{ github.event_name == 'push' }}
+    needs: [context]
+    with:
+      runs-on: ${{ inputs.runs-on }}
+      pr_labels: |
+        auto-update
+        readme
+        ${{ needs.context.outputs.no-release == 'true' && 'no-release' || '' }}
+    secrets: inherit
+
+  codeowners:
+    uses: cloudposse/.github/.github/workflows/shared-codeowners.yml@main
+    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || github.event.pull_request.state == 'open' }}
+    needs: [context]
+    with:
+      is_fork: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+      runs-on: ${{ inputs.runs-on }}
+
+  labels:
+    runs-on: ${{ fromJSON(inputs.runs-on) }}
+    if: ${{ github.event_name == 'push' || github.event.pull_request.state == 'open' }}
+    needs: [context]
+    steps:
+      - uses: cloudposse/github-action-release-label-validator@v1
+
+  mergequeue:
+    if: ${{ github.event_name == 'merge_group' }}
+    uses: cloudposse-terraform-components/.github/.github/workflows/shared-terratest-queue.yml@main
+    needs: [terraform]
+    with:
+      runs-on: ${{ inputs.runs-on }}
+      mock: true
+    secrets: inherit
+
+  ci:
+    runs-on: ${{ fromJSON(inputs.runs-on) }}
+    if: ${{ always() && (github.event_name == 'merge_group' || github.event_name == 'push' || github.event.pull_request.state == 'open') }}
+    steps:
+      - run: |
+          echo '${{ toJSON(needs) }}'  # easier debug
+          ! ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+    needs: [ terraform, readme, codeowners, labels, mergequeue ]
+
+  release:
+    needs: [ci, readme]
+    uses: cloudposse-terraform-components/.github/.github/workflows/shared-auto-release.yml@main
+    if: ${{ always() && github.event_name == 'push' && needs.ci.result == 'success' && needs.readme.result == 'success' }}
+    with:
+      runs-on: ${{ inputs.runs-on }}
+      publish: ${{ needs.readme.outputs.changes_detected == 'false' }}
+    secrets: inherit
