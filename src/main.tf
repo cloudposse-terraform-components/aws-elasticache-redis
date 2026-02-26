@@ -17,7 +17,19 @@ locals {
     eks.outputs.eks_cluster_managed_security_group_id
   ]
 
-  sg_rule_egress = var.allow_all_egress ? [] : [
+  sg_rules_ingress = length(local.allowed_cidr_blocks) == 0 ? [] : [
+    {
+      key         = "in"
+      type        = "ingress"
+      from_port   = var.port
+      to_port     = var.port
+      protocol    = "tcp"
+      cidr_blocks = local.allowed_cidr_blocks
+      description = "Allow inbound traffic from CIDR blocks"
+    }
+  ]
+
+  sg_rules_egress = var.allow_all_egress ? [] : [
     {
       key         = "out"
       type        = "egress"
@@ -25,11 +37,11 @@ locals {
       to_port     = 0
       protocol    = "-1"
       cidr_blocks = var.egress_cidr_blocks
-      description = "Selectively allow outbound traffic"
+      description = "Allow outbound traffic to CIDR blocks"
     }
   ]
 
-  additional_security_group_rules = local.sg_rule_egress
+  additional_security_group_rules = concat(local.sg_rules_ingress, local.sg_rules_egress)
 
   # global attributes
   cluster_attributes = {
@@ -38,7 +50,6 @@ locals {
     availability_zones = var.availability_zones
     multi_az_enabled   = var.multi_az_enabled
 
-    allowed_cidr_blocks             = local.allowed_cidr_blocks
     allowed_security_groups         = local.allowed_security_groups
     additional_security_group_rules = local.additional_security_group_rules
     allow_all_egress                = var.allow_all_egress
