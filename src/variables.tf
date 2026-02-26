@@ -127,6 +127,24 @@ variable "egress_cidr_blocks" {
   default     = ["0.0.0.0/0"]
 }
 
+variable "ingress_cidr_blocks_rule_description" {
+  type        = string
+  description = "Description for the security group rule allowing ingress from the CIDR blocks in `ingress_cidr_blocks`."
+  default     = "Selectively allow inbound traffic"
+}
+
+variable "egress_cidr_blocks_rule_description" {
+  type        = string
+  description = "Description for the security group rule allowing egress to the CIDR blocks in `egress_cidr_blocks`. Only used when `allow_all_egress` is `false`."
+  default     = "Selectively allow outbound traffic"
+}
+
+variable "additional_security_group_rules" {
+  type        = list(any)
+  description = "A list of Security Group rule objects to add to the created security group, in addition to the ones this module normally creates."
+  default     = []
+}
+
 variable "allow_all_egress" {
   type        = bool
   default     = true

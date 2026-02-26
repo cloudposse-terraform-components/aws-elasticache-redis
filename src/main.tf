@@ -25,7 +25,7 @@ locals {
       to_port     = var.port
       protocol    = "tcp"
       cidr_blocks = local.allowed_cidr_blocks
-      description = "Allow inbound traffic from CIDR blocks"
+      description = var.ingress_cidr_blocks_rule_description
     }
   ]
 
@@ -37,11 +37,11 @@ locals {
       to_port     = 0
       protocol    = "-1"
       cidr_blocks = var.egress_cidr_blocks
-      description = "Allow outbound traffic to CIDR blocks"
+      description = var.egress_cidr_blocks_rule_description
     }
   ]
 
-  additional_security_group_rules = concat(local.sg_rules_ingress, local.sg_rules_egress)
+  additional_security_group_rules = concat(local.sg_rules_ingress, local.sg_rules_egress, var.additional_security_group_rules)
 
   # global attributes
   cluster_attributes = {
