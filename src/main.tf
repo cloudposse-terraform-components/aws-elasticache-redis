@@ -72,6 +72,13 @@ locals {
     log_delivery_configuration    = var.log_delivery_configuration
     user_group_ids                = var.user_group_ids
     global_replication_group_id   = var.global_replication_group_id
+
+    serverless_enabled                  = var.serverless_enabled
+    serverless_major_engine_version     = var.serverless_major_engine_version
+    serverless_snapshot_time            = var.serverless_snapshot_time
+    serverless_user_group_id            = var.serverless_user_group_id
+    serverless_cache_usage_limits       = var.serverless_cache_usage_limits
+    serverless_snapshot_arns_to_restore = var.serverless_snapshot_arns_to_restore
   }
 
   clusters = module.redis_clusters
@@ -86,21 +93,21 @@ module "redis_clusters" {
   dns_subdomain = join(".", [lookup(each.value, "cluster_name", replace(each.key, "_", "-")), module.this.environment])
 
   instance_type          = each.value.instance_type
-  num_replicas           = lookup(each.value, "num_replicas", 1)
-  num_shards             = lookup(each.value, "num_shards", 0)
-  replicas_per_shard     = lookup(each.value, "replicas_per_shard", 0)
-  engine                 = lookup(each.value, "engine", "redis")
+  num_replicas           = lookup(each.value, "num_replicas", var.num_replicas)
+  num_shards             = lookup(each.value, "num_shards", var.num_shards)
+  replicas_per_shard     = lookup(each.value, "replicas_per_shard", var.replicas_per_shard)
+  engine                 = lookup(each.value, "engine", var.engine)
   engine_version         = each.value.engine_version
-  create_parameter_group = lookup(each.value, "create_parameter_group", true)
-  parameters             = lookup(each.value, "parameters", [])
-  parameter_group_name   = lookup(each.value, "parameter_group_name", null)
+  create_parameter_group = lookup(each.value, "create_parameter_group", var.create_parameter_group)
+  parameters             = lookup(each.value, "parameters", var.parameters)
+  parameter_group_name   = lookup(each.value, "parameter_group_name", var.parameter_group_name)
   cluster_attributes     = local.cluster_attributes
 
-  snapshot_name             = lookup(each.value, "snapshot_name", null)
-  snapshot_arns             = lookup(each.value, "snapshot_arns", [])
-  final_snapshot_identifier = lookup(each.value, "final_snapshot_identifier", null)
-  replication_group_id      = lookup(each.value, "replication_group_id", "")
-  description               = lookup(each.value, "description", null)
+  snapshot_name             = lookup(each.value, "snapshot_name", var.snapshot_name)
+  snapshot_arns             = lookup(each.value, "snapshot_arns", var.snapshot_arns)
+  final_snapshot_identifier = lookup(each.value, "final_snapshot_identifier", var.final_snapshot_identifier)
+  replication_group_id      = lookup(each.value, "replication_group_id", var.replication_group_id)
+  description               = lookup(each.value, "description", var.description)
 
   context = module.this.context
 }

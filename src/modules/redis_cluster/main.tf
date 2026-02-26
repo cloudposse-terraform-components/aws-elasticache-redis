@@ -66,6 +66,13 @@ module "redis" {
   vpc_id                               = var.cluster_attributes.vpc_id
   zone_id                              = var.cluster_attributes.zone_id
 
+  serverless_enabled                  = var.cluster_attributes.serverless_enabled
+  serverless_major_engine_version     = var.cluster_attributes.serverless_major_engine_version
+  serverless_snapshot_time            = var.cluster_attributes.serverless_snapshot_time
+  serverless_user_group_id            = var.cluster_attributes.serverless_user_group_id
+  serverless_cache_usage_limits       = var.cluster_attributes.serverless_cache_usage_limits
+  serverless_snapshot_arns_to_restore = var.cluster_attributes.serverless_snapshot_arns_to_restore
+
   context = module.this.context
 }
 

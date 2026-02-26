@@ -88,6 +88,13 @@ variable "cluster_attributes" {
     log_delivery_configuration    = optional(list(map(any)), [])
     user_group_ids                = optional(list(string), null)
     global_replication_group_id   = optional(string, null)
+
+    serverless_enabled                  = optional(bool, false)
+    serverless_major_engine_version     = optional(string, "7")
+    serverless_snapshot_time            = optional(string, "06:00")
+    serverless_user_group_id            = optional(string, null)
+    serverless_cache_usage_limits       = optional(map(any), {})
+    serverless_snapshot_arns_to_restore = optional(list(string), [])
   })
   description = "Cluster attributes"
 }
