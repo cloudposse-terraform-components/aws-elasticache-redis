@@ -105,6 +105,7 @@ variable "parameters" {
   }))
   description = "Parameters to configure cluster parameter group"
   default     = []
+  nullable    = false
 }
 
 variable "parameter_group_name" {
