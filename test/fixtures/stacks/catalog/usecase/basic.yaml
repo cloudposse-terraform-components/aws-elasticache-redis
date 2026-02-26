@@ -11,6 +11,7 @@ components:
         port: 6379
         at_rest_encryption_enabled: true
         transit_encryption_enabled: true
+        auth_token_enabled: false
         apply_immediately: true
         auto_minor_version_upgrade: true
         cloudwatch_metric_alarms_enabled: true
