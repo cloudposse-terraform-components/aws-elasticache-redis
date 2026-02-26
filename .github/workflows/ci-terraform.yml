@@ -139,11 +139,16 @@ jobs:
             src/modules
 
       - run: |-
-          # Build account-map module structure from the split repo
+          # Build the account-map module structure that components reference via relative paths.
+          # Two copies are needed to support both reference patterns:
+          #   ../../account-map  (from src/modules/*/) → ./account-map/modules/
+          #   ../account-map     (from src/)           → ./target/account-map/modules/
           mkdir -p ./account-map/modules
           cp -r aws-account-map/src/modules/* ./account-map/modules/
           mkdir -p ./target/account-map/modules
           cp -r aws-account-map/src/modules/* ./target/account-map/modules/
+          # For repos where terraform files live at the repo root (no src/ subdirectory),
+          # provide account-map inside the target directory as well.
           [ -n "$(ls -A ./src/*.tf 2>/dev/null )" ] || { mkdir -p ./target/src/account-map/modules && cp -r aws-account-map/src/modules/* ./target/src/account-map/modules/; }
           rm -rf aws-account-map
 
