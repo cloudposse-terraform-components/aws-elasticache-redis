@@ -17,19 +17,19 @@ locals {
     eks.outputs.eks_cluster_managed_security_group_id
   ]
 
-  sg_rule_ingress = [
+  sg_rule_egress = var.allow_all_egress ? [] : [
     {
-      key         = "in"
-      type        = "ingress"
-      from_port   = var.port
-      to_port     = var.port
-      protocol    = "tcp"
-      cidr_blocks = local.allowed_cidr_blocks
-      description = "Selectively allow inbound traffic"
+      key         = "out"
+      type        = "egress"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = var.egress_cidr_blocks
+      description = "Selectively allow outbound traffic"
     }
   ]
 
-  additional_security_group_rules = length(local.allowed_cidr_blocks) > 0 ? local.sg_rule_ingress : []
+  additional_security_group_rules = local.sg_rule_egress
 
   # global attributes
   cluster_attributes = {
@@ -38,10 +38,10 @@ locals {
     availability_zones = var.availability_zones
     multi_az_enabled   = var.multi_az_enabled
 
+    allowed_cidr_blocks             = local.allowed_cidr_blocks
     allowed_security_groups         = local.allowed_security_groups
     additional_security_group_rules = local.additional_security_group_rules
     allow_all_egress                = var.allow_all_egress
-    egress_cidr_blocks              = var.egress_cidr_blocks
 
     zone_id                          = module.dns_delegated.outputs.default_dns_zone_id
     family                           = var.family
