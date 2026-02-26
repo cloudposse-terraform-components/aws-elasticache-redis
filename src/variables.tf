@@ -15,6 +15,96 @@ variable "multi_az_enabled" {
   description = "Multi AZ (Automatic Failover must also be enabled.  If Cluster Mode is enabled, Multi AZ is on by default, and this setting is ignored)"
 }
 
+variable "num_replicas" {
+  type        = number
+  default     = 1
+  description = "Default number of replicas in the replica set for all Redis clusters. Can be overridden per cluster in redis_clusters."
+}
+
+variable "num_shards" {
+  type        = number
+  default     = 0
+  description = "Default number of shards (node groups) for Redis clusters. Value > 0 enables cluster mode. Can be overridden per cluster in redis_clusters."
+
+  validation {
+    condition     = var.num_shards >= 0 && var.num_shards <= 500
+    error_message = "num_shards must be between 0 and 500; use 0 to disable cluster mode."
+  }
+}
+
+variable "replicas_per_shard" {
+  type        = number
+  default     = 0
+  description = "Default number of replica nodes per shard for Redis clusters. Valid values are 0 to 5. Can be overridden per cluster in redis_clusters."
+
+  validation {
+    condition     = var.replicas_per_shard >= 0 && var.replicas_per_shard <= 5
+    error_message = "replicas_per_shard must be between 0 and 5."
+  }
+}
+
+variable "engine" {
+  type        = string
+  default     = "redis"
+  description = "Default cache engine for all Redis clusters. Valid values: `redis` or `valkey`. Can be overridden per cluster in redis_clusters."
+
+  validation {
+    condition     = contains(["redis", "valkey"], var.engine)
+    error_message = "engine must be either 'redis' or 'valkey'."
+  }
+}
+
+variable "create_parameter_group" {
+  type        = bool
+  default     = true
+  description = "Default setting for whether a new parameter group should be created for all Redis clusters. Set to false to use an existing parameter group. Can be overridden per cluster in redis_clusters."
+}
+
+variable "parameters" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default     = []
+  description = "Default list of Redis parameters to configure for all clusters. Can be overridden per cluster in redis_clusters."
+}
+
+variable "parameter_group_name" {
+  type        = string
+  default     = null
+  description = "Default override parameter group name for all Redis clusters. Can be overridden per cluster in redis_clusters."
+}
+
+variable "snapshot_name" {
+  type        = string
+  default     = null
+  description = "Default name of a snapshot to restore into all new Redis clusters. Changing this forces a new resource. Can be overridden per cluster in redis_clusters."
+}
+
+variable "snapshot_arns" {
+  type        = list(string)
+  default     = []
+  description = "Default list of ARNs of Redis RDB snapshot files in S3 to restore into all new clusters. Can be overridden per cluster in redis_clusters."
+}
+
+variable "final_snapshot_identifier" {
+  type        = string
+  default     = null
+  description = "Default name of the final snapshot to create before deleting all Redis clusters. If null, no final snapshot is created. Can be overridden per cluster in redis_clusters."
+}
+
+variable "replication_group_id" {
+  type        = string
+  default     = ""
+  description = "Default replication group ID for all Redis clusters. Must be 1-20 alphanumeric characters or hyphens, start with a letter, and not end with or contain consecutive hyphens. Can be overridden per cluster in redis_clusters."
+}
+
+variable "description" {
+  type        = string
+  default     = null
+  description = "Default description for all Redis replication groups. Can be overridden per cluster in redis_clusters."
+}
+
 variable "family" {
   type        = string
   description = "Redis family"
