@@ -65,7 +65,7 @@ components:
       vars:
         enabled: true
         name: "elasticache-redis"
-        family: redis6.x
+        family: redis7.x
         egress_cidr_blocks: ["0.0.0.0/0"]
         port: 6379
         at_rest_encryption_enabled: true
@@ -76,20 +76,23 @@ components:
         snapshot_retention_limit: 1
         snapshot_window: "06:00-07:00"
         maintenance_window: "tue:08:00-tue:09:00"
+        # Global defaults for all redis_clusters (can be overridden per cluster)
+        engine: "redis"
+        num_replicas: 1
+        num_shards: 0
+        replicas_per_shard: 0
+        create_parameter_group: true
+        parameters: []
         redis_clusters:
           redis-main:
-            num_replicas: 1
-            num_shards: 0
-            replicas_per_shard: 0
-            engine: "redis"
-            engine_version: 6.0.5
-            instance_type: cache.t2.small
+            engine_version: "7.0"
+            instance_type: cache.t4g.small
             parameters:
               - name: notify-keyspace-events
                 value: "lK"
 ```
 
-`stacks/org/ou/account/region.yaml` file (imports and overrides the default settings for a specific cluster):
+`stacks/org/ou/account/region.yaml` file (imports defaults and overrides per-cluster settings):
 
 ```yaml
 import:
@@ -102,14 +105,57 @@ components:
         enabled: true
         redis_clusters:
           redis-main:
-            num_replicas: 1
-            num_shards: 0
-            replicas_per_shard: 0
-            engine_version: 6.0.5
-            instance_type: cache.t2.small
+            engine_version: "7.0"
+            instance_type: cache.t4g.small
+            # Per-cluster overrides of the global defaults
+            num_replicas: 2       # override global default of 1
+            num_shards: 3         # override global default of 0 (enables cluster mode)
+            replicas_per_shard: 1 # override global default of 0
             parameters:
               - name: notify-keyspace-events
                 value: lK
+```
+
+Alternatively, if any per-cluster defaults are not covered by component-level variables,
+use [YAML anchors](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) to define shared
+values once and merge them into each cluster entry:
+
+```yaml
+# stacks/catalog/elasticache/elasticache-redis/defaults.yaml
+anchors:
+  default_redis: &default_redis
+    engine: "redis"
+    engine_version: "7.0"
+    instance_type: cache.t4g.small
+    num_replicas: 1
+    num_shards: 0
+    replicas_per_shard: 0
+
+components:
+  terraform:
+    elasticache-redis:
+      vars:
+        enabled: true
+        name: "elasticache-redis"
+        family: redis7.x
+        port: 6379
+        at_rest_encryption_enabled: true
+        transit_encryption_enabled: false
+        apply_immediately: false
+        automatic_failover_enabled: false
+        cloudwatch_metric_alarms_enabled: false
+        snapshot_retention_limit: 1
+        redis_clusters:
+          redis-main:
+            <<: *default_redis     # merge anchor defaults
+            num_replicas: 2        # override anchor value
+          redis-valkey:
+            <<: *default_redis
+            engine: "valkey"       # override engine to valkey
+            num_shards: 3          # enable cluster mode
+            replicas_per_shard: 1
+          redis-cache:
+            <<: *default_redis     # all anchor defaults apply
 ```
 
 <!-- prettier-ignore-start -->
@@ -177,16 +223,20 @@ No resources.
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | Availability zone IDs | `list(string)` | `[]` | no |
 | <a name="input_cloudwatch_metric_alarms_enabled"></a> [cloudwatch\_metric\_alarms\_enabled](#input\_cloudwatch\_metric\_alarms\_enabled) | Boolean flag to enable/disable CloudWatch metrics alarms | `bool` | n/a | yes |
 | <a name="input_context"></a> [context](#input\_context) | Single object for setting entire context at once.<br/>See description of individual variables for details.<br/>Leave string and numeric variables as `null` to use default value.<br/>Individual variable settings (non-null) override settings in context object,<br/>except for attributes, tags, and additional\_tag\_map, which are merged. | `any` | <pre>{<br/>  "additional_tag_map": {},<br/>  "attributes": [],<br/>  "delimiter": null,<br/>  "descriptor_formats": {},<br/>  "enabled": true,<br/>  "environment": null,<br/>  "id_length_limit": null,<br/>  "label_key_case": null,<br/>  "label_order": [],<br/>  "label_value_case": null,<br/>  "labels_as_tags": [<br/>    "unset"<br/>  ],<br/>  "name": null,<br/>  "namespace": null,<br/>  "regex_replace_chars": null,<br/>  "stage": null,<br/>  "tags": {},<br/>  "tenant": null<br/>}</pre> | no |
+| <a name="input_create_parameter_group"></a> [create\_parameter\_group](#input\_create\_parameter\_group) | Default setting for whether a new parameter group should be created for all Redis clusters. Set to false to use an existing parameter group. Can be overridden per cluster in redis\_clusters. | `bool` | `true` | no |
 | <a name="input_data_tiering_enabled"></a> [data\_tiering\_enabled](#input\_data\_tiering\_enabled) | Enables data tiering. Data tiering is only supported for replication groups using the r6gd node type. | `bool` | `false` | no |
 | <a name="input_delimiter"></a> [delimiter](#input\_delimiter) | Delimiter to be used between ID elements.<br/>Defaults to `-` (hyphen). Set to `""` to use no delimiter at all. | `string` | `null` | no |
+| <a name="input_description"></a> [description](#input\_description) | Default description for all Redis replication groups. Can be overridden per cluster in redis\_clusters. | `string` | `null` | no |
 | <a name="input_descriptor_formats"></a> [descriptor\_formats](#input\_descriptor\_formats) | Describe additional descriptors to be output in the `descriptors` output map.<br/>Map of maps. Keys are names of descriptors. Values are maps of the form<br/>`{<br/>  format = string<br/>  labels = list(string)<br/>}`<br/>(Type is `any` so the map values can later be enhanced to provide additional options.)<br/>`format` is a Terraform format string to be passed to the `format()` function.<br/>`labels` is a list of labels, in order, to pass to `format()` function.<br/>Label values will be normalized before being passed to `format()` so they will be<br/>identical to how they appear in `id`.<br/>Default is `{}` (`descriptors` output will be empty). | `any` | `{}` | no |
 | <a name="input_dns_delegated_component_name"></a> [dns\_delegated\_component\_name](#input\_dns\_delegated\_component\_name) | The name of the Delegated DNS component | `string` | `"dns-delegated"` | no |
 | <a name="input_eks_component_names"></a> [eks\_component\_names](#input\_eks\_component\_names) | The names of the eks components | `set(string)` | `[]` | no |
 | <a name="input_eks_security_group_enabled"></a> [eks\_security\_group\_enabled](#input\_eks\_security\_group\_enabled) | Use the eks default security group | `bool` | `false` | no |
 | <a name="input_elasticache_subnet_group_name"></a> [elasticache\_subnet\_group\_name](#input\_elasticache\_subnet\_group\_name) | Subnet group name for the ElastiCache instance | `string` | `""` | no |
 | <a name="input_enabled"></a> [enabled](#input\_enabled) | Set to false to prevent the module from creating any resources | `bool` | `null` | no |
+| <a name="input_engine"></a> [engine](#input\_engine) | Default cache engine for all Redis clusters. Valid values: `redis` or `valkey`. Can be overridden per cluster in redis\_clusters. | `string` | `"redis"` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | `null` | no |
 | <a name="input_family"></a> [family](#input\_family) | Redis family | `string` | n/a | yes |
+| <a name="input_final_snapshot_identifier"></a> [final\_snapshot\_identifier](#input\_final\_snapshot\_identifier) | Default name of the final snapshot to create before deleting all Redis clusters. If null, no final snapshot is created. Can be overridden per cluster in redis\_clusters. | `string` | `null` | no |
 | <a name="input_global_replication_group_id"></a> [global\_replication\_group\_id](#input\_global\_replication\_group\_id) | The ID of the global replication group to which this replication group should belong. If this parameter is specified, the replication group is added to the specified global replication group as a secondary replication group; otherwise, the replication group is not part of any global replication group. If global\_replication\_group\_id is set, the num\_node\_groups parameter cannot be set. | `string` | `null` | no |
 | <a name="input_id_length_limit"></a> [id\_length\_limit](#input\_id\_length\_limit) | Limit `id` to this many characters (minimum 6).<br/>Set to `0` for unlimited length.<br/>Set to `null` for keep the existing setting, which defaults to `0`.<br/>Does not affect `id_full`. | `number` | `null` | no |
 | <a name="input_ingress_cidr_blocks"></a> [ingress\_cidr\_blocks](#input\_ingress\_cidr\_blocks) | CIDR blocks for permitted ingress | `list(string)` | `[]` | no |
@@ -202,12 +252,26 @@ No resources.
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | ID element. Usually an abbreviation of your organization name, e.g. 'eg' or 'cp', to help ensure generated IDs are globally unique | `string` | `null` | no |
 | <a name="input_network_type"></a> [network\_type](#input\_network\_type) | The network type of the cluster. Valid values: ipv4, ipv6, dual\_stack. | `string` | `"ipv4"` | no |
 | <a name="input_notification_topic_arn"></a> [notification\_topic\_arn](#input\_notification\_topic\_arn) | Notification topic arn | `string` | `""` | no |
+| <a name="input_num_replicas"></a> [num\_replicas](#input\_num\_replicas) | Default number of replicas in the replica set for all Redis clusters. Can be overridden per cluster in redis\_clusters. | `number` | `1` | no |
+| <a name="input_num_shards"></a> [num\_shards](#input\_num\_shards) | Default number of shards (node groups) for Redis clusters. Value > 0 enables cluster mode. Can be overridden per cluster in redis\_clusters. | `number` | `0` | no |
 | <a name="input_ok_actions"></a> [ok\_actions](#input\_ok\_actions) | The list of actions to execute when this alarm transitions into an OK state from any other state. Each action is specified as an Amazon Resource Number (ARN) | `list(string)` | `[]` | no |
 | <a name="input_parameter_group_description"></a> [parameter\_group\_description](#input\_parameter\_group\_description) | Managed by Terraform | `string` | `null` | no |
+| <a name="input_parameter_group_name"></a> [parameter\_group\_name](#input\_parameter\_group\_name) | Default override parameter group name for all Redis clusters. Can be overridden per cluster in redis\_clusters. | `string` | `null` | no |
+| <a name="input_parameters"></a> [parameters](#input\_parameters) | Default list of Redis parameters to configure for all clusters. Can be overridden per cluster in redis\_clusters. | <pre>list(object({<br/>    name  = string<br/>    value = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_port"></a> [port](#input\_port) | Port number | `number` | n/a | yes |
 | <a name="input_redis_clusters"></a> [redis\_clusters](#input\_redis\_clusters) | Redis cluster configuration | `map(any)` | n/a | yes |
 | <a name="input_regex_replace_chars"></a> [regex\_replace\_chars](#input\_regex\_replace\_chars) | Terraform regular expression (regex) string.<br/>Characters matching the regex will be removed from the ID elements.<br/>If not set, `"/[^a-zA-Z0-9-]/"` is used to remove all characters other than hyphens, letters and digits. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | AWS region | `string` | n/a | yes |
+| <a name="input_replicas_per_shard"></a> [replicas\_per\_shard](#input\_replicas\_per\_shard) | Default number of replica nodes per shard for Redis clusters. Valid values are 0 to 5. Can be overridden per cluster in redis\_clusters. | `number` | `0` | no |
+| <a name="input_replication_group_id"></a> [replication\_group\_id](#input\_replication\_group\_id) | Default replication group ID for all Redis clusters. Must be 1-20 alphanumeric characters or hyphens, start with a letter, and not end with or contain consecutive hyphens. Can be overridden per cluster in redis\_clusters. | `string` | `""` | no |
+| <a name="input_serverless_cache_usage_limits"></a> [serverless\_cache\_usage\_limits](#input\_serverless\_cache\_usage\_limits) | The usage limits for the serverless cache. Expected keys are `data_storage` (with `maximum`, `minimum`, `unit`) and `ecpu_per_second` (with `maximum`, `minimum`). | `map(any)` | `{}` | no |
+| <a name="input_serverless_enabled"></a> [serverless\_enabled](#input\_serverless\_enabled) | Flag to enable/disable creation of a serverless redis cluster | `bool` | `false` | no |
+| <a name="input_serverless_major_engine_version"></a> [serverless\_major\_engine\_version](#input\_serverless\_major\_engine\_version) | The major version of the engine to use for the serverless cluster | `string` | `"7"` | no |
+| <a name="input_serverless_snapshot_arns_to_restore"></a> [serverless\_snapshot\_arns\_to\_restore](#input\_serverless\_snapshot\_arns\_to\_restore) | The list of ARN(s) of the snapshot that the new serverless cache will be created from. Available for Redis only. | `list(string)` | `[]` | no |
+| <a name="input_serverless_snapshot_time"></a> [serverless\_snapshot\_time](#input\_serverless\_snapshot\_time) | The daily time (in UTC, format HH:MM) that snapshots will be created from the serverless cache. | `string` | `"06:00"` | no |
+| <a name="input_serverless_user_group_id"></a> [serverless\_user\_group\_id](#input\_serverless\_user\_group\_id) | User Group ID to associate with the serverless replication group | `string` | `null` | no |
+| <a name="input_snapshot_arns"></a> [snapshot\_arns](#input\_snapshot\_arns) | Default list of ARNs of Redis RDB snapshot files in S3 to restore into all new clusters. Can be overridden per cluster in redis\_clusters. | `list(string)` | `[]` | no |
+| <a name="input_snapshot_name"></a> [snapshot\_name](#input\_snapshot\_name) | Default name of a snapshot to restore into all new Redis clusters. Changing this forces a new resource. Can be overridden per cluster in redis\_clusters. | `string` | `null` | no |
 | <a name="input_snapshot_retention_limit"></a> [snapshot\_retention\_limit](#input\_snapshot\_retention\_limit) | The number of days for which ElastiCache will retain automatic cache cluster snapshots before deleting them. | `number` | `0` | no |
 | <a name="input_snapshot_window"></a> [snapshot\_window](#input\_snapshot\_window) | The daily time range (in UTC) during which ElastiCache begins taking a daily snapshot. Format: hh:mm-hh:mm. Defaults to null (AWS chooses the window). Has no effect when snapshot\_retention\_limit is 0. | `string` | `null` | no |
 | <a name="input_stage"></a> [stage](#input\_stage) | ID element. Usually used to indicate role, e.g. 'prod', 'staging', 'source', 'build', 'test', 'deploy', 'release' | `string` | `null` | no |
