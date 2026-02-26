@@ -28,6 +28,10 @@ on:
         required: false
         default: '["ubuntu-latest"]'
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   format:
     runs-on: ${{ fromJSON(inputs.runs-on) }}
