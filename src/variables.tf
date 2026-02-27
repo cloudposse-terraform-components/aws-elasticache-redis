@@ -43,6 +43,12 @@ variable "replicas_per_shard" {
   }
 }
 
+variable "instance_type" {
+  type        = string
+  default     = null
+  description = "Default instance type for all Redis clusters. Can be overridden per cluster in redis_clusters."
+}
+
 variable "engine" {
   type        = string
   default     = "redis"

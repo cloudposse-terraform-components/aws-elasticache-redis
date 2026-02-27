@@ -103,7 +103,7 @@ module "redis_clusters" {
   cluster_name  = lookup(each.value, "cluster_name", replace(each.key, "_", "-"))
   dns_subdomain = join(".", [lookup(each.value, "cluster_name", replace(each.key, "_", "-")), module.this.environment])
 
-  instance_type          = each.value.instance_type
+  instance_type          = lookup(each.value, "instance_type", var.instance_type)
   num_replicas           = lookup(each.value, "num_replicas", var.num_replicas)
   num_shards             = lookup(each.value, "num_shards", var.num_shards)
   replicas_per_shard     = lookup(each.value, "replicas_per_shard", var.replicas_per_shard)
