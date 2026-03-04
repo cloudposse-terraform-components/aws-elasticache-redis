@@ -38,6 +38,7 @@ components:
         maintenance_window: "tue:08:00-tue:09:00"
         # Global defaults for all redis_clusters (can be overridden per cluster)
         engine: "redis"
+        engine_version: "7.0"
         instance_type: cache.t4g.small
         num_replicas: 1
         num_shards: 0
@@ -46,6 +47,7 @@ components:
         parameters: []
         redis_clusters:
           redis-main:
+            instance_type: cache.t4g.small
             engine_version: "7.0"
             parameters:
               - name: notify-keyspace-events
@@ -65,9 +67,9 @@ components:
         enabled: true
         redis_clusters:
           redis-main:
-            engine_version: "7.0"
             instance_type: cache.t4g.small
             # Per-cluster overrides of the global defaults
+            engine_version: "7.1"     # override global default of 7.0
             num_replicas: 2       # override global default of 1
             num_shards: 3         # override global default of 0 (enables cluster mode)
             replicas_per_shard: 1 # override global default of 0
@@ -85,7 +87,6 @@ values once and merge them into each cluster entry:
 anchors:
   default_redis: &default_redis
     engine: "redis"
-    engine_version: "7.0"
     instance_type: cache.t4g.small
     num_replicas: 1
     num_shards: 0
@@ -105,6 +106,8 @@ components:
         automatic_failover_enabled: false
         cloudwatch_metric_alarms_enabled: false
         snapshot_retention_limit: 1
+        # Global default engine version for all clusters (can be overridden per cluster)
+        engine_version: "7.0"
         redis_clusters:
           redis-main:
             <<: *default_redis     # merge anchor defaults
@@ -185,6 +188,7 @@ No resources.
 | <a name="input_elasticache_subnet_group_name"></a> [elasticache\_subnet\_group\_name](#input\_elasticache\_subnet\_group\_name) | Subnet group name for the ElastiCache instance | `string` | `""` | no |
 | <a name="input_enabled"></a> [enabled](#input\_enabled) | Set to false to prevent the module from creating any resources | `bool` | `null` | no |
 | <a name="input_engine"></a> [engine](#input\_engine) | Default cache engine for all Redis clusters. Valid values: `redis` or `valkey`. Can be overridden per cluster in redis\_clusters. | `string` | `"redis"` | no |
+| <a name="input_engine_version"></a> [engine\_version](#input\_engine\_version) | Default engine version for all Redis clusters (e.g. `7.0`). Can be overridden per cluster in redis\_clusters. | `string` | `null` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | `null` | no |
 | <a name="input_family"></a> [family](#input\_family) | Redis family | `string` | n/a | yes |
 | <a name="input_final_snapshot_identifier"></a> [final\_snapshot\_identifier](#input\_final\_snapshot\_identifier) | Default name of the final snapshot to create before deleting all Redis clusters. If null, no final snapshot is created. Can be overridden per cluster in redis\_clusters. | `string` | `null` | no |
