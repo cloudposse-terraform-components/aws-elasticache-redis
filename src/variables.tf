@@ -60,6 +60,12 @@ variable "engine" {
   }
 }
 
+variable "engine_version" {
+  type        = string
+  default     = null
+  description = "Default engine version for all Redis clusters (e.g. `7.0`). Can be overridden per cluster in redis_clusters."
+}
+
 variable "create_parameter_group" {
   type        = bool
   default     = true

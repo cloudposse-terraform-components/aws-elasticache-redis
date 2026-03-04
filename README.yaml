@@ -33,6 +33,7 @@ usage: |-
           maintenance_window: "tue:08:00-tue:09:00"
           # Global defaults for all redis_clusters (can be overridden per cluster)
           engine: "redis"
+          engine_version: "7.0"
           instance_type: cache.t4g.small
           num_replicas: 1
           num_shards: 0
@@ -41,6 +42,7 @@ usage: |-
           parameters: []
           redis_clusters:
             redis-main:
+              instance_type: cache.t4g.small
               engine_version: "7.0"
               parameters:
                 - name: notify-keyspace-events
@@ -60,9 +62,9 @@ usage: |-
           enabled: true
           redis_clusters:
             redis-main:
-              engine_version: "7.0"
               instance_type: cache.t4g.small
               # Per-cluster overrides of the global defaults
+              engine_version: "7.1"     # override global default of 7.0
               num_replicas: 2       # override global default of 1
               num_shards: 3         # override global default of 0 (enables cluster mode)
               replicas_per_shard: 1 # override global default of 0
@@ -80,7 +82,6 @@ usage: |-
   anchors:
     default_redis: &default_redis
       engine: "redis"
-      engine_version: "7.0"
       instance_type: cache.t4g.small
       num_replicas: 1
       num_shards: 0
@@ -100,6 +101,8 @@ usage: |-
           automatic_failover_enabled: false
           cloudwatch_metric_alarms_enabled: false
           snapshot_retention_limit: 1
+          # Global default engine version for all clusters (can be overridden per cluster)
+          engine_version: "7.0"
           redis_clusters:
             redis-main:
               <<: *default_redis     # merge anchor defaults
