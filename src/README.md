@@ -188,7 +188,7 @@ No resources.
 | <a name="input_elasticache_subnet_group_name"></a> [elasticache\_subnet\_group\_name](#input\_elasticache\_subnet\_group\_name) | Subnet group name for the ElastiCache instance | `string` | `""` | no |
 | <a name="input_enabled"></a> [enabled](#input\_enabled) | Set to false to prevent the module from creating any resources | `bool` | `null` | no |
 | <a name="input_engine"></a> [engine](#input\_engine) | Default cache engine for all Redis clusters. Valid values: `redis` or `valkey`. Can be overridden per cluster in redis\_clusters. | `string` | `"redis"` | no |
-| <a name="input_engine_version"></a> [engine\_version](#input\_engine\_version) | Default engine version for all Redis clusters (e.g. `7.0`). Can be overridden per cluster in redis\_clusters. | `string` | `"7.0"` | no |
+| <a name="input_engine_version"></a> [engine\_version](#input\_engine\_version) | Default engine version for all Redis clusters (e.g. `7.0`). Can be overridden per cluster in redis\_clusters. | `string` | `null` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | `null` | no |
 | <a name="input_family"></a> [family](#input\_family) | Redis family | `string` | n/a | yes |
 | <a name="input_final_snapshot_identifier"></a> [final\_snapshot\_identifier](#input\_final\_snapshot\_identifier) | Default name of the final snapshot to create before deleting all Redis clusters. If null, no final snapshot is created. Can be overridden per cluster in redis\_clusters. | `string` | `null` | no |
