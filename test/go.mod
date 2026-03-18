@@ -1,6 +1,6 @@
 module test
 
-go 1.24.2
+go 1.24.13
 
 require (
 	github.com/cloudposse/test-helpers v0.25.0
