@@ -62,7 +62,7 @@ variable "engine" {
 
 variable "engine_version" {
   type        = string
-  default     = "7.0"
+  default     = null
   description = "Default engine version for all Redis clusters (e.g. `7.0`). Can be overridden per cluster in redis_clusters."
 }
 

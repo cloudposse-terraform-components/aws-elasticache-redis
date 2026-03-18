@@ -20,7 +20,7 @@ variable "engine" {
 variable "engine_version" {
   type        = string
   description = "Version of the cache engine to use"
-  default     = "7.0"
+  default     = "6.0.5"
 }
 
 variable "dns_subdomain" {

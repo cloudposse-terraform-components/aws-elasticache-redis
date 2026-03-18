@@ -48,7 +48,7 @@
 | <a name="input_dns_subdomain"></a> [dns\_subdomain](#input\_dns\_subdomain) | Name of DNS subdomain to prepend to Route53 zone DNS name | `string` | n/a | yes |
 | <a name="input_enabled"></a> [enabled](#input\_enabled) | Set to false to prevent the module from creating any resources | `bool` | `null` | no |
 | <a name="input_engine"></a> [engine](#input\_engine) | Name of the cache engine to use: either `redis` or `valkey` | `string` | `"redis"` | no |
-| <a name="input_engine_version"></a> [engine\_version](#input\_engine\_version) | Version of the cache engine to use | `string` | `"7.0"` | no |
+| <a name="input_engine_version"></a> [engine\_version](#input\_engine\_version) | Version of the cache engine to use | `string` | `"6.0.5"` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | `null` | no |
 | <a name="input_final_snapshot_identifier"></a> [final\_snapshot\_identifier](#input\_final\_snapshot\_identifier) | The name of your final node group (shard) snapshot. ElastiCache creates the snapshot from the primary node in the cluster. If omitted, no final snapshot will be made. | `string` | `null` | no |
 | <a name="input_id_length_limit"></a> [id\_length\_limit](#input\_id\_length\_limit) | Limit `id` to this many characters (minimum 6).<br/>Set to `0` for unlimited length.<br/>Set to `null` for keep the existing setting, which defaults to `0`.<br/>Does not affect `id_full`. | `number` | `null` | no |
