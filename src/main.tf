@@ -110,7 +110,7 @@ module "redis_clusters" {
   engine                 = lookup(each.value, "engine", var.engine)
   engine_version         = lookup(each.value, "engine_version", var.engine_version)
   create_parameter_group = lookup(each.value, "create_parameter_group", var.create_parameter_group)
-  parameters             = lookup(each.value, "parameters", var.parameters)
+  parameters             = coalesce(lookup(each.value, "parameters", null), var.parameters, [])
   parameter_group_name   = lookup(each.value, "parameter_group_name", var.parameter_group_name)
   cluster_attributes     = local.cluster_attributes
 

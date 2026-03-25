@@ -1,13 +1,10 @@
-# Elastic Cache Redis Cluster
-
-
-
-
-
-
+# ElastiCache Redis Cluster
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 <!-- markdownlint-disable -->
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -87,12 +84,4 @@
 | <a name="output_cluster_security_group_id"></a> [cluster\_security\_group\_id](#output\_cluster\_security\_group\_id) | Cluster Security Group ID |
 | <a name="output_cluster_ssm_path_auth_token"></a> [cluster\_ssm\_path\_auth\_token](#output\_cluster\_ssm\_path\_auth\_token) | SSM path of Redis auth\_token |
 | <a name="output_transit_encryption_mode"></a> [transit\_encryption\_mode](#output\_transit\_encryption\_mode) | TLS in-transit encryption mode for Redis cluster |
-<!-- markdownlint-restore -->
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-
-
-
-
-
-
-
+<!-- END_TF_DOCS -->

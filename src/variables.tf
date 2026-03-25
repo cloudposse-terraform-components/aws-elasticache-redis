@@ -78,6 +78,7 @@ variable "parameters" {
     value = string
   }))
   default     = []
+  nullable    = false
   description = "Default list of Redis parameters to configure for all clusters. Can be overridden per cluster in redis_clusters."
 }
 

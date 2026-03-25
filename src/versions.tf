@@ -6,5 +6,9 @@ terraform {
       source  = "hashicorp/aws"
       version = ">= 5.73.0, < 7.0.0"
     }
+    utils = {
+      source  = "cloudposse/utils"
+      version = ">= 2.0.0, < 3.0.0"
+    }
   }
 }
