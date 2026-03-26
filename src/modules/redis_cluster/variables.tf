@@ -69,9 +69,10 @@ variable "cluster_attributes" {
     automatic_failover_enabled      = bool
     auto_minor_version_upgrade      = bool
     auth_token_enabled              = bool
-    snapshot_retention_limit        = number
-    snapshot_window                 = optional(string, null)
-    maintenance_window              = optional(string, null)
+    snapshot_retention_limit          = number
+    snapshot_window                   = optional(string, null)
+    maintenance_window                = optional(string, null)
+    cloudwatch_metric_alarms_enabled = optional(bool, false)
 
     elasticache_subnet_group_name = optional(string, "")
     network_type                  = optional(string, "ipv4")

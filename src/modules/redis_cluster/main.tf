@@ -55,6 +55,7 @@ module "redis" {
   ok_actions                           = var.cluster_attributes.ok_actions
   snapshot_arns                        = var.snapshot_arns
   snapshot_name                        = var.snapshot_name
+  cloudwatch_metric_alarms_enabled     = var.cluster_attributes.cloudwatch_metric_alarms_enabled
   snapshot_retention_limit             = var.cluster_attributes.snapshot_retention_limit
   snapshot_window                      = var.cluster_attributes.snapshot_window
   maintenance_window                   = var.cluster_attributes.maintenance_window
