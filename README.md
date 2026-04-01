@@ -78,6 +78,8 @@ components:
         maintenance_window: "tue:08:00-tue:09:00"
         # Global defaults for all redis_clusters (can be overridden per cluster)
         engine: "redis"
+        engine_version: "7.0"
+        instance_type: cache.t4g.small
         num_replicas: 1
         num_shards: 0
         replicas_per_shard: 0
@@ -85,8 +87,8 @@ components:
         parameters: []
         redis_clusters:
           redis-main:
-            engine_version: "7.0"
             instance_type: cache.t4g.small
+            engine_version: "7.0"
             parameters:
               - name: notify-keyspace-events
                 value: "lK"
@@ -105,9 +107,9 @@ components:
         enabled: true
         redis_clusters:
           redis-main:
-            engine_version: "7.0"
             instance_type: cache.t4g.small
             # Per-cluster overrides of the global defaults
+            engine_version: "7.1"     # override global default of 7.0
             num_replicas: 2       # override global default of 1
             num_shards: 3         # override global default of 0 (enables cluster mode)
             replicas_per_shard: 1 # override global default of 0
@@ -125,7 +127,6 @@ values once and merge them into each cluster entry:
 anchors:
   default_redis: &default_redis
     engine: "redis"
-    engine_version: "7.0"
     instance_type: cache.t4g.small
     num_replicas: 1
     num_shards: 0
@@ -145,6 +146,8 @@ components:
         automatic_failover_enabled: false
         cloudwatch_metric_alarms_enabled: false
         snapshot_retention_limit: 1
+        # Global default engine version for all clusters (can be overridden per cluster)
+        engine_version: "7.0"
         redis_clusters:
           redis-main:
             <<: *default_redis     # merge anchor defaults
@@ -180,7 +183,8 @@ components:
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.73.0, < 6.0.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.73.0, < 7.0.0 |
+| <a name="requirement_utils"></a> [utils](#requirement\_utils) | >= 2.0.0, < 3.0.0 |
 
 ## Providers
 
@@ -190,13 +194,13 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_dns_delegated"></a> [dns\_delegated](#module\_dns\_delegated) | cloudposse/stack-config/yaml//modules/remote-state | 1.8.0 |
-| <a name="module_eks"></a> [eks](#module\_eks) | cloudposse/stack-config/yaml//modules/remote-state | 1.8.0 |
+| <a name="module_dns_delegated"></a> [dns\_delegated](#module\_dns\_delegated) | cloudposse/stack-config/yaml//modules/remote-state | 2.0.0 |
+| <a name="module_eks"></a> [eks](#module\_eks) | cloudposse/stack-config/yaml//modules/remote-state | 2.0.0 |
 | <a name="module_iam_roles"></a> [iam\_roles](#module\_iam\_roles) | ../account-map/modules/iam-roles | n/a |
 | <a name="module_redis_clusters"></a> [redis\_clusters](#module\_redis\_clusters) | ./modules/redis_cluster | n/a |
 | <a name="module_this"></a> [this](#module\_this) | cloudposse/label/null | 0.25.0 |
-| <a name="module_vpc"></a> [vpc](#module\_vpc) | cloudposse/stack-config/yaml//modules/remote-state | 1.8.0 |
-| <a name="module_vpc_ingress"></a> [vpc\_ingress](#module\_vpc\_ingress) | cloudposse/stack-config/yaml//modules/remote-state | 1.8.0 |
+| <a name="module_vpc"></a> [vpc](#module\_vpc) | cloudposse/stack-config/yaml//modules/remote-state | 2.0.0 |
+| <a name="module_vpc_ingress"></a> [vpc\_ingress](#module\_vpc\_ingress) | cloudposse/stack-config/yaml//modules/remote-state | 2.0.0 |
 
 ## Resources
 
@@ -206,6 +210,7 @@ No resources.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_additional_security_group_rules"></a> [additional\_security\_group\_rules](#input\_additional\_security\_group\_rules) | A list of Security Group rule objects to add to the created security group, in addition to the ones this module normally creates. | `list(any)` | `[]` | no |
 | <a name="input_additional_tag_map"></a> [additional\_tag\_map](#input\_additional\_tag\_map) | Additional key-value pairs to add to each map in `tags_as_list_of_maps`. Not added to `tags` or `id`.<br/>This is for some rare cases where resources want additional configuration of tags<br/>and therefore take a list of maps with tag key, value, and additional configuration. | `map(string)` | `{}` | no |
 | <a name="input_alarm_actions"></a> [alarm\_actions](#input\_alarm\_actions) | Alarm action list | `list(string)` | `[]` | no |
 | <a name="input_alarm_cpu_threshold_percent"></a> [alarm\_cpu\_threshold\_percent](#input\_alarm\_cpu\_threshold\_percent) | CPU threshold alarm level | `number` | `75` | no |
@@ -229,17 +234,22 @@ No resources.
 | <a name="input_description"></a> [description](#input\_description) | Default description for all Redis replication groups. Can be overridden per cluster in redis\_clusters. | `string` | `null` | no |
 | <a name="input_descriptor_formats"></a> [descriptor\_formats](#input\_descriptor\_formats) | Describe additional descriptors to be output in the `descriptors` output map.<br/>Map of maps. Keys are names of descriptors. Values are maps of the form<br/>`{<br/>  format = string<br/>  labels = list(string)<br/>}`<br/>(Type is `any` so the map values can later be enhanced to provide additional options.)<br/>`format` is a Terraform format string to be passed to the `format()` function.<br/>`labels` is a list of labels, in order, to pass to `format()` function.<br/>Label values will be normalized before being passed to `format()` so they will be<br/>identical to how they appear in `id`.<br/>Default is `{}` (`descriptors` output will be empty). | `any` | `{}` | no |
 | <a name="input_dns_delegated_component_name"></a> [dns\_delegated\_component\_name](#input\_dns\_delegated\_component\_name) | The name of the Delegated DNS component | `string` | `"dns-delegated"` | no |
+| <a name="input_egress_cidr_blocks"></a> [egress\_cidr\_blocks](#input\_egress\_cidr\_blocks) | Egress CIDR blocks for the created security group. Only used when `allow_all_egress` is `false`. | `list(string)` | <pre>[<br/>  "0.0.0.0/0"<br/>]</pre> | no |
+| <a name="input_egress_cidr_blocks_rule_description"></a> [egress\_cidr\_blocks\_rule\_description](#input\_egress\_cidr\_blocks\_rule\_description) | Description for the security group rule allowing egress to the CIDR blocks in `egress_cidr_blocks`. Only used when `allow_all_egress` is `false`. | `string` | `"Selectively allow outbound traffic"` | no |
 | <a name="input_eks_component_names"></a> [eks\_component\_names](#input\_eks\_component\_names) | The names of the eks components | `set(string)` | `[]` | no |
 | <a name="input_eks_security_group_enabled"></a> [eks\_security\_group\_enabled](#input\_eks\_security\_group\_enabled) | Use the eks default security group | `bool` | `false` | no |
 | <a name="input_elasticache_subnet_group_name"></a> [elasticache\_subnet\_group\_name](#input\_elasticache\_subnet\_group\_name) | Subnet group name for the ElastiCache instance | `string` | `""` | no |
 | <a name="input_enabled"></a> [enabled](#input\_enabled) | Set to false to prevent the module from creating any resources | `bool` | `null` | no |
 | <a name="input_engine"></a> [engine](#input\_engine) | Default cache engine for all Redis clusters. Valid values: `redis` or `valkey`. Can be overridden per cluster in redis\_clusters. | `string` | `"redis"` | no |
+| <a name="input_engine_version"></a> [engine\_version](#input\_engine\_version) | Default engine version for all Redis clusters (e.g. `7.0`). Can be overridden per cluster in redis\_clusters. | `string` | `null` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | `null` | no |
 | <a name="input_family"></a> [family](#input\_family) | Redis family | `string` | n/a | yes |
 | <a name="input_final_snapshot_identifier"></a> [final\_snapshot\_identifier](#input\_final\_snapshot\_identifier) | Default name of the final snapshot to create before deleting all Redis clusters. If null, no final snapshot is created. Can be overridden per cluster in redis\_clusters. | `string` | `null` | no |
 | <a name="input_global_replication_group_id"></a> [global\_replication\_group\_id](#input\_global\_replication\_group\_id) | The ID of the global replication group to which this replication group should belong. If this parameter is specified, the replication group is added to the specified global replication group as a secondary replication group; otherwise, the replication group is not part of any global replication group. If global\_replication\_group\_id is set, the num\_node\_groups parameter cannot be set. | `string` | `null` | no |
 | <a name="input_id_length_limit"></a> [id\_length\_limit](#input\_id\_length\_limit) | Limit `id` to this many characters (minimum 6).<br/>Set to `0` for unlimited length.<br/>Set to `null` for keep the existing setting, which defaults to `0`.<br/>Does not affect `id_full`. | `number` | `null` | no |
 | <a name="input_ingress_cidr_blocks"></a> [ingress\_cidr\_blocks](#input\_ingress\_cidr\_blocks) | CIDR blocks for permitted ingress | `list(string)` | `[]` | no |
+| <a name="input_ingress_cidr_blocks_rule_description"></a> [ingress\_cidr\_blocks\_rule\_description](#input\_ingress\_cidr\_blocks\_rule\_description) | Description for the security group rule allowing ingress from the CIDR blocks in `ingress_cidr_blocks`. | `string` | `"Selectively allow inbound traffic"` | no |
+| <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Default instance type for all Redis clusters. Can be overridden per cluster in redis\_clusters. | `string` | `null` | no |
 | <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | The ARN of the key that you wish to use if encrypting at rest. If not supplied, uses service managed encryption. `at_rest_encryption_enabled` must be set to `true` | `string` | `null` | no |
 | <a name="input_label_key_case"></a> [label\_key\_case](#input\_label\_key\_case) | Controls the letter case of the `tags` keys (label names) for tags generated by this module.<br/>Does not affect keys of tags passed in via the `tags` input.<br/>Possible values: `lower`, `title`, `upper`.<br/>Default value: `title`. | `string` | `null` | no |
 | <a name="input_label_order"></a> [label\_order](#input\_label\_order) | The order in which the labels (ID elements) appear in the `id`.<br/>Defaults to ["namespace", "environment", "stage", "name", "attributes"].<br/>You can omit any of the 6 labels ("tenant" is the 6th), but at least one must be present. | `list(string)` | `null` | no |

@@ -17,7 +17,7 @@ locals {
     eks.outputs.eks_cluster_managed_security_group_id
   ]
 
-  sg_rule_ingress = [
+  sg_rules_ingress = length(local.allowed_cidr_blocks) == 0 ? [] : [
     {
       key         = "in"
       type        = "ingress"
@@ -25,11 +25,23 @@ locals {
       to_port     = var.port
       protocol    = "tcp"
       cidr_blocks = local.allowed_cidr_blocks
-      description = "Selectively allow inbound traffic"
+      description = var.ingress_cidr_blocks_rule_description
     }
   ]
 
-  additional_security_group_rules = length(local.allowed_cidr_blocks) > 0 ? local.sg_rule_ingress : []
+  sg_rules_egress = var.allow_all_egress ? [] : [
+    {
+      key         = "out"
+      type        = "egress"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = var.egress_cidr_blocks
+      description = var.egress_cidr_blocks_rule_description
+    }
+  ]
+
+  additional_security_group_rules = concat(local.sg_rules_ingress, local.sg_rules_egress, var.additional_security_group_rules)
 
   # global attributes
   cluster_attributes = {
@@ -89,16 +101,16 @@ module "redis_clusters" {
   for_each = var.redis_clusters
 
   cluster_name  = lookup(each.value, "cluster_name", replace(each.key, "_", "-"))
-  dns_subdomain = join(".", [lookup(each.value, "cluster_name", replace(each.key, "_", "-")), module.this.environment])
+  dns_subdomain = lookup(each.value, "dns_subdomain", join(".", [lookup(each.value, "cluster_name", replace(each.key, "_", "-")), module.this.environment]))
 
-  instance_type          = each.value.instance_type
+  instance_type          = lookup(each.value, "instance_type", var.instance_type)
   num_replicas           = lookup(each.value, "num_replicas", var.num_replicas)
   num_shards             = lookup(each.value, "num_shards", var.num_shards)
   replicas_per_shard     = lookup(each.value, "replicas_per_shard", var.replicas_per_shard)
   engine                 = lookup(each.value, "engine", var.engine)
-  engine_version         = each.value.engine_version
+  engine_version         = lookup(each.value, "engine_version", var.engine_version)
   create_parameter_group = lookup(each.value, "create_parameter_group", var.create_parameter_group)
-  parameters             = lookup(each.value, "parameters", var.parameters)
+  parameters             = coalesce(lookup(each.value, "parameters", null), var.parameters, [])
   parameter_group_name   = lookup(each.value, "parameter_group_name", var.parameter_group_name)
   cluster_attributes     = local.cluster_attributes
 

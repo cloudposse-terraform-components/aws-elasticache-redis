@@ -43,6 +43,12 @@ variable "replicas_per_shard" {
   }
 }
 
+variable "instance_type" {
+  type        = string
+  default     = null
+  description = "Default instance type for all Redis clusters. Can be overridden per cluster in redis_clusters."
+}
+
 variable "engine" {
   type        = string
   default     = "redis"
@@ -52,6 +58,12 @@ variable "engine" {
     condition     = contains(["redis", "valkey"], var.engine)
     error_message = "engine must be either 'redis' or 'valkey'."
   }
+}
+
+variable "engine_version" {
+  type        = string
+  default     = null
+  description = "Default engine version for all Redis clusters (e.g. `7.0`). Can be overridden per cluster in redis_clusters."
 }
 
 variable "create_parameter_group" {
@@ -66,6 +78,7 @@ variable "parameters" {
     value = string
   }))
   default     = []
+  nullable    = false
   description = "Default list of Redis parameters to configure for all clusters. Can be overridden per cluster in redis_clusters."
 }
 
@@ -118,6 +131,30 @@ variable "port" {
 variable "ingress_cidr_blocks" {
   type        = list(string)
   description = "CIDR blocks for permitted ingress"
+  default     = []
+}
+
+variable "egress_cidr_blocks" {
+  type        = list(string)
+  description = "Egress CIDR blocks for the created security group. Only used when `allow_all_egress` is `false`."
+  default     = ["0.0.0.0/0"]
+}
+
+variable "ingress_cidr_blocks_rule_description" {
+  type        = string
+  description = "Description for the security group rule allowing ingress from the CIDR blocks in `ingress_cidr_blocks`."
+  default     = "Selectively allow inbound traffic"
+}
+
+variable "egress_cidr_blocks_rule_description" {
+  type        = string
+  description = "Description for the security group rule allowing egress to the CIDR blocks in `egress_cidr_blocks`. Only used when `allow_all_egress` is `false`."
+  default     = "Selectively allow outbound traffic"
+}
+
+variable "additional_security_group_rules" {
+  type        = list(any)
+  description = "A list of Security Group rule objects to add to the created security group, in addition to the ones this module normally creates."
   default     = []
 }
 
