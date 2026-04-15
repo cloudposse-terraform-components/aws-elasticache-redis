@@ -1,0 +1,181 @@
+---
+# This is a local override of cloudposse-terraform-components/.github's shared-ci-terraform.yml.
+# The only change is in the `lint` job: we check out `account-map` from the split repo
+# (cloudposse-terraform-components/aws-account-map v1.537.2) which ships stack-config/yaml v2.0.0,
+# instead of cloudposse/terraform-aws-components 1.521.0 which ships v1.5.0 and causes an
+# unsatisfiable cloudposse/utils provider constraint (>= 2.0.0 vs < 2.0.0).
+#
+# TODO: Remove this file once cloudposse-terraform-components/.github updates shared-ci-terraform.yml
+# to use a compatible account-map version.
+name: |-
+  CI - Terraform
+
+  Lint, format and validate terraform code
+on:
+  workflow_call:
+    inputs:
+      suggestions:
+        description: "Enable Reviewdog suggestions (pull request only)"
+        type: boolean
+        required: true
+      filter-mode:
+        description: "Reviewdog filter mode"
+        type: string
+        required: true
+      runs-on:
+        description: "Overrides job runs-on setting (json-encoded list)"
+        type: string
+        required: false
+        default: '["ubuntu-latest"]'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  format:
+    runs-on: ${{ fromJSON(inputs.runs-on) }}
+    name: Format HCL
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Terraform format
+        uses: dflook/terraform-fmt@v2
+
+      - name: Reviewdog suggester
+        if: ${{ inputs.suggestions }}
+        uses: reviewdog/action-suggester@v1.24.0
+        with:
+          tool_name: "terraform fmt -recursive"
+          cleanup: false
+          filter_mode: ${{ inputs.filter-mode }}
+
+      - name: Status check
+        shell: bash
+        run: git diff --exit-code
+
+  bats:
+    runs-on: ubuntu-latest
+    container: cloudposse/test-harness:latest
+    env:
+      MAKE_INCLUDES: Makefile
+      TF_PLUGIN_CACHE_DIR: /tmp
+      BATS_MODULE_TESTS: input-descriptions module-pinning provider-pinning output-descriptions
+      BATS_EXAMPLES_TESTS: input-descriptions lint output-descriptions
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Run tests on modified modules
+        shell: bash -x -e -o pipefail {0}
+        run: |
+          # when running in test-harness, need to mark the directory safe for git operations
+          git config --global --add safe.directory "$GITHUB_WORKSPACE";
+          MODIFIED_MODULES=($(find . -type f -name "*.tf" | xargs -I{} dirname {} | sort | uniq | grep  -v ^./.git/ || true))
+          pass=true
+          for relative_dir in "${MODIFIED_MODULES[@]}"; do
+            dir=$(realpath $relative_dir)
+            printf "\n\nBegin testing in $dir\n"
+            (
+              status=pass
+              cd $dir
+              [[ $relative_dir =~ ./examples/.* ]] && tests=$BATS_EXAMPLES_TESTS || tests=$BATS_MODULE_TESTS
+              for test in $tests; do
+                printf "\n\nRunning ${test} in $dir\n"
+                bats -t /test/terraform/${test}.bats || status=fail
+              done
+              [[ $status == "pass" ]]
+            ) || pass=false
+            printf "\n\nEnd of testing in $dir\n\n\n"
+          done
+          [[ $pass == "true" ]]
+
+  lint-find-dirs:
+    name: Find modules
+    runs-on: ${{ fromJSON(inputs.runs-on) }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - id: set-matrix
+        # Ignore directories whose names start with .terraform or obsolete
+        run: |
+          matrix=$(find .  -type d \( -name '.terraform*' -o -name 'obsolete*' \) -prune -o \
+            -name '*.tf' \
+            -not -path '*/.terraform/*' \
+            -exec dirname {} \; \
+            | sort \
+            | uniq \
+            | jq --raw-input --slurp 'split("\n")| map(select(. != ""))')
+          echo "matrix=$(echo $matrix)" >> $GITHUB_OUTPUT
+    outputs:
+      tfdirs_matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+  lint:
+    runs-on: ${{ fromJSON(inputs.runs-on) }}
+    name: Lint (${{ matrix.tfdir }})
+    needs: lint-find-dirs
+    strategy:
+      fail-fast: false
+      matrix:
+        tfdir: ${{ fromJson(needs.lint-find-dirs.outputs.tfdirs_matrix) }}
+    env:
+      TFLINT_PLUGIN_DIR: ${{ github.workspace }}/.tflint.d/plugins
+      TFLINT_PLUGINS: aws
+      TFLINT_CACHE_VER: 1 # Increment this to force a cache refresh
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: target
+
+      # Use the split repo (aws-account-map v1.537.2) which ships stack-config/yaml v2.0.0,
+      # instead of the monorepo's 1.521.0 which ships v1.5.0 and creates an unsatisfiable
+      # cloudposse/utils provider constraint.
+      - uses: actions/checkout@v5
+        with:
+          repository: cloudposse-terraform-components/aws-account-map
+          ref: v1.537.2
+          path: aws-account-map
+          fetch-depth: 1
+          sparse-checkout: |
+            src/modules
+
+      - run: |-
+          # Build the account-map module structure that components reference via relative paths.
+          # Two copies are needed to support both reference patterns:
+          #   ../../account-map  (from src/modules/*/) → ./account-map/modules/
+          #   ../account-map     (from src/)           → ./target/account-map/modules/
+          mkdir -p ./account-map/modules
+          cp -r aws-account-map/src/modules/* ./account-map/modules/
+          mkdir -p ./target/account-map/modules
+          cp -r aws-account-map/src/modules/* ./target/account-map/modules/
+          # For repos where terraform files live at the repo root (no src/ subdirectory),
+          # provide account-map inside the target directory as well.
+          [ -n "$(ls -A ./src/*.tf 2>/dev/null )" ] || { mkdir -p ./target/src/account-map/modules && cp -r aws-account-map/src/modules/* ./target/src/account-map/modules/; }
+          rm -rf aws-account-map
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - run: |-
+          terraform init
+        working-directory: ./target/${{ matrix.tfdir }}
+
+      - name: cache tflint plugins
+        id: cache-plugins
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TFLINT_PLUGIN_DIR }}
+          key: tflint-plugins-${{ env.TFLINT_CACHE_VER }}
+
+      - name: tflint
+        uses: reviewdog/action-tflint@v1.25.0
+        with:
+          reporter: ${{ inputs.suggestions && 'github-pr-annotations' || 'local' }}
+          fail_on_error: ${{ inputs.suggestions }}
+          tflint_rulesets: ${{ env.TFLINT_PLUGINS }}
+          tflint_init: true
+          working_directory: ./target/${{ matrix.tfdir }}
+          filter_mode: ${{ inputs.filter-mode }}
+          tflint_version: "v0.49.0"

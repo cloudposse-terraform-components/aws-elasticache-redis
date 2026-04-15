@@ -22,6 +22,15 @@ permissions:
   pull-requests: write
 
 jobs:
+  # Use local terraform-component.yml instead of the shared workflow because
+  # shared-ci-terraform.yml sources account-map from cloudposse/terraform-aws-components
+  # at 1.521.0, which ships stack-config/yaml v1.5.0 (cloudposse/utils < 2.0.0).
+  # This conflicts with our stack-config/yaml v2.0.0 (cloudposse/utils >= 2.0.0).
+  # The local workflow uses aws-account-map v1.537.2 (stack-config/yaml v2.0.0) instead.
+  #
+  # TODO: Revert to shared workflow once cloudposse-terraform-components/.github
+  # updates shared-ci-terraform.yml with a compatible account-map version:
+  #   uses: cloudposse-terraform-components/.github/.github/workflows/shared-terraform-component.yml@main
   component:
-    uses: cloudposse-terraform-components/.github/.github/workflows/shared-terraform-component.yml@main
+    uses: ./.github/workflows/terraform-component.yml
     secrets: inherit
