@@ -27,4 +27,3 @@ components:
             parameters:
               - name: cluster-allow-pubsubshard-when-down
                 value: "yes"
-

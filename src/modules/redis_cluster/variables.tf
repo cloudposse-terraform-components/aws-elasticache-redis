@@ -52,26 +52,27 @@ variable "replicas_per_shard" {
 
 variable "cluster_attributes" {
   type = object({
-    availability_zones              = list(string)
-    vpc_id                          = string
-    additional_security_group_rules = list(any)
-    allowed_security_groups         = list(string)
-    allow_all_egress                = bool
-    subnets                         = list(string)
-    family                          = string
-    port                            = number
-    zone_id                         = string
-    multi_az_enabled                = bool
-    at_rest_encryption_enabled      = bool
-    transit_encryption_enabled      = bool
-    transit_encryption_mode         = string
-    apply_immediately               = bool
-    automatic_failover_enabled      = bool
-    auto_minor_version_upgrade      = bool
-    auth_token_enabled              = bool
-    snapshot_retention_limit        = number
-    snapshot_window                 = optional(string, null)
-    maintenance_window              = optional(string, null)
+    availability_zones               = list(string)
+    vpc_id                           = string
+    additional_security_group_rules  = list(any)
+    allowed_security_groups          = list(string)
+    allow_all_egress                 = bool
+    subnets                          = list(string)
+    family                           = string
+    port                             = number
+    zone_id                          = string
+    multi_az_enabled                 = bool
+    at_rest_encryption_enabled       = bool
+    transit_encryption_enabled       = bool
+    transit_encryption_mode          = string
+    apply_immediately                = bool
+    automatic_failover_enabled       = bool
+    auto_minor_version_upgrade       = bool
+    auth_token_enabled               = bool
+    snapshot_retention_limit         = number
+    snapshot_window                  = optional(string, null)
+    maintenance_window               = optional(string, null)
+    cloudwatch_metric_alarms_enabled = optional(bool, false)
 
     elasticache_subnet_group_name = optional(string, "")
     network_type                  = optional(string, "ipv4")
