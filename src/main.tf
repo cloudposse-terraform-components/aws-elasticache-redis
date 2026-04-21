@@ -112,7 +112,7 @@ module "redis_clusters" {
   create_parameter_group = lookup(each.value, "create_parameter_group", var.create_parameter_group)
   parameters             = coalesce(lookup(each.value, "parameters", null), var.parameters, [])
   parameter_group_name   = lookup(each.value, "parameter_group_name", var.parameter_group_name)
-  cluster_attributes     = local.cluster_attributes
+  cluster_attributes     = merge(local.cluster_attributes, { for k, v in var.cluster_attributes : k => v if v != null })
 
   snapshot_name             = lookup(each.value, "snapshot_name", var.snapshot_name)
   snapshot_arns             = lookup(each.value, "snapshot_arns", var.snapshot_arns)

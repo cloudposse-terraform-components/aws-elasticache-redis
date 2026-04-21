@@ -397,6 +397,55 @@ variable "serverless_snapshot_arns_to_restore" {
   description = "The list of ARN(s) of the snapshot that the new serverless cache will be created from. Available for Redis only."
 }
 
+variable "cluster_attributes" {
+  type = object({
+    availability_zones              = optional(list(string), null)
+    vpc_id                          = optional(string, null)
+    additional_security_group_rules = optional(list(any), null)
+    allowed_security_groups         = optional(list(string), null)
+    allow_all_egress                = optional(bool, null)
+    subnets                         = optional(list(string), null)
+    family                          = optional(string, null)
+    port                            = optional(number, null)
+    zone_id                         = optional(string, null)
+    multi_az_enabled                = optional(bool, null)
+    at_rest_encryption_enabled      = optional(bool, null)
+    transit_encryption_enabled      = optional(bool, null)
+    transit_encryption_mode         = optional(string, null)
+    apply_immediately               = optional(bool, null)
+    automatic_failover_enabled      = optional(bool, null)
+    auto_minor_version_upgrade      = optional(bool, null)
+    auth_token_enabled              = optional(bool, null)
+    snapshot_retention_limit        = optional(number, null)
+    snapshot_window                 = optional(string, null)
+    maintenance_window              = optional(string, null)
+
+    elasticache_subnet_group_name = optional(string, null)
+    network_type                  = optional(string, null)
+    notification_topic_arn        = optional(string, null)
+    alarm_cpu_threshold_percent   = optional(number, null)
+    alarm_memory_threshold_bytes  = optional(number, null)
+    alarm_actions                 = optional(list(string), null)
+    ok_actions                    = optional(list(string), null)
+    data_tiering_enabled          = optional(bool, null)
+    auth_token_update_strategy    = optional(string, null)
+    kms_key_id                    = optional(string, null)
+    parameter_group_description   = optional(string, null)
+    log_delivery_configuration    = optional(list(map(any)), null)
+    user_group_ids                = optional(list(string), null)
+    global_replication_group_id   = optional(string, null)
+
+    serverless_enabled                  = optional(bool, null)
+    serverless_major_engine_version     = optional(string, null)
+    serverless_snapshot_time            = optional(string, null)
+    serverless_user_group_id            = optional(string, null)
+    serverless_cache_usage_limits       = optional(map(any), null)
+    serverless_snapshot_arns_to_restore = optional(list(string), null)
+  })
+  default     = {}
+  description = "Cluster attributes to override the defaults derived from the other component variables. Merged with the computed cluster attributes, with values from this variable taking precedence. Only non-null values override the computed defaults."
+}
+
 variable "vpc_component_name" {
   type        = string
   description = "The name of a VPC component"
