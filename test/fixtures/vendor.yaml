@@ -19,7 +19,7 @@ spec:
 
     - component: "vpc"
       source: github.com/cloudposse-terraform-components/aws-vpc.git//src?ref={{.Version}}
-      version: v2.1.1
+      version: v2.2.0
       targets:
         - "components/terraform/vpc"
       included_paths:
@@ -27,12 +27,11 @@ spec:
         - "**/*.md"
         - "**/*.tftmpl"
         - "**/modules/**"
-      excluded_paths:
-        - "remote-state.tf"
+      excluded_paths: []
 
     - component: "dns-delegated"
       source: github.com/cloudposse-terraform-components/aws-dns-delegated.git//src?ref={{.Version}}
-      version: v1.537.1
+      version: v1.537.2
       targets:
         - "components/terraform/dns-delegated"
       included_paths:
@@ -40,5 +39,4 @@ spec:
         - "**/*.md"
         - "**/*.tftmpl"
         - "**/modules/**"
-      excluded_paths:
-        - "remote-state.tf"
+      excluded_paths: []
