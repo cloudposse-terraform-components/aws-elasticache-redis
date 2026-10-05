@@ -6,6 +6,21 @@ locals {
   ssm_path_auth_token = local.auth_token_enabled ? format("/%s/%s/%s", "elasticache-redis", var.cluster_name, "auth_token") : null
 
   auth_token = local.auth_token_enabled ? one(random_password.auth_token[*].result) : null
+
+  log_delivery_configuration = (var.slow_logs_enabled || var.engine_logs_enabled) ? concat(
+    var.slow_logs_enabled ? [{
+      destination      = aws_cloudwatch_log_group.slow_log[0].name
+      destination_type = "cloudwatch-logs"
+      log_format       = "json"
+      log_type         = "slow-log"
+    }] : [],
+    var.engine_logs_enabled ? [{
+      destination      = aws_cloudwatch_log_group.engine_log[0].name
+      destination_type = "cloudwatch-logs"
+      log_format       = "json"
+      log_type         = "engine-log"
+    }] : []
+  ) : var.cluster_attributes.log_delivery_configuration
 }
 
 module "redis" {
@@ -25,7 +40,7 @@ module "redis" {
   automatic_failover_enabled           = var.cluster_attributes.automatic_failover_enabled
   availability_zones                   = var.cluster_attributes.availability_zones
   multi_az_enabled                     = var.cluster_attributes.multi_az_enabled
-  cluster_mode_enabled                 = var.num_shards > 0
+  cluster_mode_enabled                 = var.cluster_mode_enabled != null ? var.cluster_mode_enabled : var.num_shards > 0
   cluster_mode_num_node_groups         = var.num_shards
   cluster_mode_replicas_per_node_group = var.replicas_per_shard
   cluster_size                         = var.num_replicas
@@ -40,7 +55,7 @@ module "redis" {
   global_replication_group_id          = var.cluster_attributes.global_replication_group_id
   instance_type                        = var.instance_type
   kms_key_id                           = var.cluster_attributes.kms_key_id
-  log_delivery_configuration           = var.cluster_attributes.log_delivery_configuration
+  log_delivery_configuration           = local.log_delivery_configuration
   create_parameter_group               = var.create_parameter_group
   parameter                            = var.parameters
   parameter_group_description          = var.cluster_attributes.parameter_group_description
@@ -118,4 +133,18 @@ module "parameter_store_write" {
   ]
 
   context = module.this.context
+}
+
+resource "aws_cloudwatch_log_group" "slow_log" {
+  count             = local.enabled && var.slow_logs_enabled ? 1 : 0
+  name              = "/aws/elasticache/${var.cluster_name}/slow-log"
+  retention_in_days = var.log_retention_days
+  tags              = module.this.tags
+}
+
+resource "aws_cloudwatch_log_group" "engine_log" {
+  count             = local.enabled && var.engine_logs_enabled ? 1 : 0
+  name              = "/aws/elasticache/${var.cluster_name}/engine-log"
+  retention_in_days = var.log_retention_days
+  tags              = module.this.tags
 }
