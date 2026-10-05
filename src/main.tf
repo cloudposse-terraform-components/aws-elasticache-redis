@@ -114,6 +114,11 @@ module "redis_clusters" {
   parameter_group_name   = lookup(each.value, "parameter_group_name", var.parameter_group_name)
   cluster_attributes     = local.cluster_attributes
 
+  slow_logs_enabled    = lookup(each.value, "slow_logs_enabled", var.slow_logs_enabled)
+  engine_logs_enabled  = lookup(each.value, "engine_logs_enabled", var.engine_logs_enabled)
+  log_retention_days   = lookup(each.value, "log_retention_days", var.log_retention_days)
+  cluster_mode_enabled = lookup(each.value, "cluster_mode_enabled", var.cluster_mode_enabled)
+
   snapshot_name             = lookup(each.value, "snapshot_name", var.snapshot_name)
   snapshot_arns             = lookup(each.value, "snapshot_arns", var.snapshot_arns)
   final_snapshot_identifier = lookup(each.value, "final_snapshot_identifier", var.final_snapshot_identifier)

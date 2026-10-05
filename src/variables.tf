@@ -414,3 +414,27 @@ variable "dns_delegated_component_name" {
   description = "The name of the Delegated DNS component"
   default     = "dns-delegated"
 }
+
+variable "slow_logs_enabled" {
+  type        = bool
+  default     = false
+  description = "Enable Redis SLOWLOG delivery to a managed CloudWatch log group"
+}
+
+variable "engine_logs_enabled" {
+  type        = bool
+  default     = false
+  description = "Enable Redis engine log delivery to a managed CloudWatch log group"
+}
+
+variable "log_retention_days" {
+  type        = number
+  default     = 7
+  description = "Retention in days for the managed CloudWatch log groups"
+}
+
+variable "cluster_mode_enabled" {
+  type        = bool
+  default     = null
+  description = "Explicitly enable or disable Redis cluster mode. When null, cluster mode follows num_shards > 0"
+}
