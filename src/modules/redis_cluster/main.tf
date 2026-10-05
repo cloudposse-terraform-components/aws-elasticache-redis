@@ -7,7 +7,7 @@ locals {
 
   auth_token = local.auth_token_enabled ? one(random_password.auth_token[*].result) : null
 
-  log_delivery_configuration = (var.slow_logs_enabled || var.engine_logs_enabled) ? concat(
+  log_delivery_configuration = local.enabled && (var.slow_logs_enabled || var.engine_logs_enabled) ? concat(
     var.slow_logs_enabled ? [{
       destination      = aws_cloudwatch_log_group.slow_log[0].name
       destination_type = "cloudwatch-logs"
